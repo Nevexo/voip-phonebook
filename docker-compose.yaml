@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo
+    volumes:
+      - phonebook_mongodb_data:/data/db
+
+volumes:
+  phonebook_mongodb_data:

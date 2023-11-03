@@ -1,11 +1,20 @@
 {
   "name": "voip-phonebook",
   "module": "index.ts",
+  "version": "0.0.1",
   "type": "module",
   "devDependencies": {
     "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "nanoid": "^5.0.2",
+    "socket.io": "^4.7.2",
+    "winston": "^3.11.0"
   }
 }

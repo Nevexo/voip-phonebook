@@ -6,7 +6,7 @@
 import { User } from "../types/User";
 import { logger } from "../index";
 
-const get_user = async (id) => {
+export const get_user = async (id) => {
   // Get a user from the database.
   return await User.findOne({ id: id });
 }
@@ -14,6 +14,13 @@ const get_user = async (id) => {
 export const get_user_safe = async (id) => {
   // Get a user from the database, but don't return the password hash.
   return await User.findOne({ id: id }, { password_hash: 0, _id: 0, __v: 0 });
+}
+
+export const get_user_by_email = async (email_address) => {
+  const user = await User.findOne({ email_address: email_address });
+
+  if (!user) return undefined;
+  return get_user_safe(user.id);
 }
 
 export const user_is_root = async (id) => {
@@ -101,7 +108,10 @@ export const change_user_password = async (id, plain_text_password) => {
   }
 
   // Hash the password.
-  const password_hash = await bcrypt.hash(plain_text_password, 10)
+  const password_hash = await Bun.password.hash(plain_text_password, {
+    algorithm: "bcrypt",
+    cost: 10,
+  });
 
   // Update the user.
   await User.updateOne({ id: id }, { password_hash: password_hash })

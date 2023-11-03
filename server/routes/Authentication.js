@@ -2,7 +2,6 @@
 // (c) Cameron Fleming 2023.
 
 import { Router } from "express";
-import { nanoid } from 'nanoid';
 
 import {
   get_user_by_email,

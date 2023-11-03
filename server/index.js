@@ -27,6 +27,10 @@ export const logger = winston.createLogger({
 
 import { get_user_safe, get_all_users, create_user } from './auth/Users';
 
+// Import routers
+import { router as authentication_router } from './routes/Authentication'
+import { router as user_maangement_router } from './routes/UserManagement'
+
 // Setup socket.io and export the instance
 export const vendor_service_socket = new Server()
 export const frontend_service_socket = new Server()
@@ -120,6 +124,8 @@ const main = async () => {
 
   // Load routes
   logger.debug("router: preparing routes")
+  express_app.use('/auth', authentication_router)
+  express_app.use('/user', user_maangement_router)
   
   // Start express server
   if (!process.env.API_LISTEN_PORT) {

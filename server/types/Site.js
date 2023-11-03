@@ -7,7 +7,7 @@ import { Schema, model } from "mongoose";
 import { nanoid } from 'nanoid';
 import { User } from "./User";
 
-const siteSchema = new Schema({
+export const siteSchema = new Schema({
   id: {
     type: String,
     default: () => nanoid(10),
@@ -19,12 +19,14 @@ const siteSchema = new Schema({
     required: true,
   },
   authorised_users: {
-    type: [User],
+    type: [Schema.Types.ObjectId],
+    ref: User,
     required: true,
     default: [],
   },
   created_by: {
-    type: User,
+    type: Schema.Types.ObjectId,
+    ref: User,
     required: true,
   },
   created_at: {

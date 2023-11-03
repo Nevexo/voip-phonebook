@@ -9,7 +9,7 @@ import { Schema, model } from "mongoose";
 import { nanoid } from 'nanoid';
 import { PhonebookContainer } from "./Phonebook";
 
-const phonebookFieldSchema = new Schema({
+export const phonebookFieldSchema = new Schema({
   id: {
     type: String,
     default: () => nanoid(10),
@@ -21,7 +21,8 @@ const phonebookFieldSchema = new Schema({
     required: true,
   },
   phonebook_container: {
-    type: PhonebookContainer,
+    type: Schema.Types.ObjectId,
+    ref: PhonebookContainer,
     required: true,
   },
   created_at: {

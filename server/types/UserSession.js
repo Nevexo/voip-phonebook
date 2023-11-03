@@ -5,9 +5,9 @@
 import { Schema, model } from "mongoose";
 
 import { nanoid } from 'nanoid';
-import { User } from "./User.js";
+import { User } from "./User";
 
-const userSessionSchema = new Schema({
+export const userSessionSchema = new Schema({
   id: {
     type: String,
     default: () => nanoid(10),
@@ -15,7 +15,8 @@ const userSessionSchema = new Schema({
     unique: true,
   },
   user: {
-    type: User,
+    type: Schema.Types.ObjectId,
+    ref: User,
     required: true,
   },
   token: {
@@ -40,7 +41,8 @@ const userSessionSchema = new Schema({
   expires_at: {
     type: Date,
     required: true,
-    default: () => Date.now() + process.env.SESSION_TOKEN_DEFAULT_SECONDS || 2592000000, // 30 days
+    default: () => new Date(Date.now() +
+           (process.env.SESSION_TOKEN_DEFAULT_SECONDS ? process.env.SESSION_TOKEN_DEFAULT_SECONDS : 2592000) * 1000),
   },
 });
 

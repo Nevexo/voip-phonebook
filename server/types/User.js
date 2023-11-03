@@ -7,7 +7,7 @@ import { Schema, model } from "mongoose";
 import { nanoid } from 'nanoid';
 
 
-const userSchema = new Schema({
+export const userSchema = new Schema({
   id: {
     type: String,
     default: () => nanoid(10),

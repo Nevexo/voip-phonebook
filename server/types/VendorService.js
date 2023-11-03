@@ -8,8 +8,9 @@
 import { Schema, model } from "mongoose";
 
 import { nanoid } from 'nanoid';
+import { PhonebookField } from "./PhonebookField";
 
-const vendorServiceSchema = new Schema({
+export const vendorServiceSchema = new Schema({
   id: {
     type: String,
     default: () => nanoid(10),
@@ -29,7 +30,8 @@ const vendorServiceSchema = new Schema({
     required: false,
   },
   supported_fields: {
-    type: [String],
+    type: [Schema.Types.ObjectId],
+    ref: PhonebookField,
     required: true,
     default: [],
   },

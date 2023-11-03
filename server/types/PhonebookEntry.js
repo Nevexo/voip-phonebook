@@ -8,7 +8,7 @@ import { nanoid } from 'nanoid';
 import { PhonebookContainer } from "./Phonebook";
 import { User } from "./User";
 
-const phonebookEntrySchema = new Schema({
+export const phonebookEntrySchema = new Schema({
   id: {
     type: String,
     default: () => nanoid(10),
@@ -29,7 +29,8 @@ const phonebookEntrySchema = new Schema({
     default: {},
   },
   phonebook_container: {
-    type: PhonebookContainer,
+    type: Schema.Types.ObjectId,
+    ref: PhonebookContainer,
     required: true,
   },
   created_by: {

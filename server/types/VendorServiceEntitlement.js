@@ -9,7 +9,7 @@ import { nanoid } from 'nanoid';
 import { PhonebookContainer } from "./PhonebookContainer";
 import { VendorService } from "./VendorService";
 
-const vendorServiceEntitlementSchema = new Schema({
+export const vendorServiceEntitlementSchema = new Schema({
   id: {
     type: String,
     default: () => nanoid(10),
@@ -23,23 +23,14 @@ const vendorServiceEntitlementSchema = new Schema({
     enum: ["setup", "invalid", "active"],
   },
   phonebook_container: {
-    type: PhonebookContainer,
+    type: Schema.Types.ObjectId,
+    ref: PhonebookContainer,
     required: true,
   },
   vendor_service: {
-    type: VendorService,
+    type: Schema.Types.ObjectId,
+    ref: VendorService,
     required: true,
-  },
-  access_token: {
-    type: String,
-    required: true,
-    default: () => nanoid(64),
-    validate: {
-      validator: (v) => {
-        return v.length === 64;
-      },
-      message: (props) => `${props.value} is not a valid access token.`,
-    },
   },
   configuration: {
     type: Object,

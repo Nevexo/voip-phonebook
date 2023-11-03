@@ -7,7 +7,7 @@ import { Schema, model } from "mongoose";
 import { nanoid } from 'nanoid';
 import { Site } from "./Site";
 
-const phonebookContainerSchema = new Schema({
+export const phonebookContainerSchema = new Schema({
   id: {
     type: String,
     default: () => nanoid(10),

@@ -13,5 +13,3 @@ env | grep -E 'VENDOR_SERVICE_SOCKET_PORT|FRONTEND_SERVICE_SOCKET_PORT|API_LISTE
 docker-compose -f "../docker-compose.dev.yaml" up --build -d
 
 echo "Razzled."
-
-bun run .

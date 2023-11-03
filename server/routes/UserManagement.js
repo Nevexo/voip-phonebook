@@ -3,9 +3,6 @@
 // (c) Cameron Fleming 2023.
 
 import { Router } from "express";
-import { nanoid } from 'nanoid';
-import { User } from "../types/User.js";
-import { UserSession } from "../types/UserSession";
 import { 
   create_user, 
   get_user_safe, 

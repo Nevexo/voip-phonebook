@@ -10,7 +10,7 @@ rm -rf logs/*
 env | grep -E 'VENDOR_SERVICE_SOCKET_PORT|FRONTEND_SERVICE_SOCKET_PORT|API_LISTEN_PORT|LOG_LEVEL|MONGO_URI'
 
 # Setup docker-compose dev environment
-docker-compose -f "../docker-compose.dev.yaml" up --build -d
+docker-compose -f "../docker-compose.yaml" -f "../docker-compose.dev.yaml" up --build -d
 
 echo "Razzled."
 

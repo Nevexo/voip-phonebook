@@ -99,9 +99,9 @@ export const delete_site = async (id) => {
     return { error: "site_has_non_system_created_fields" };
   }
 
-  // Delete all system fields
+  // Delete all system fields with force delete.
   for (const field of fields) {
-    await delete_phonebook_field(field.id);
+    await delete_phonebook_field(field.id, true);
   }
 
   await Site.deleteOne({ id: id });

@@ -61,7 +61,7 @@ export const create_phonebook_field = async (site_id, name, type, required, syst
   return field;
 }
 
-export const delete_phonebook_field = async (id) => {
+export const delete_phonebook_field = async (id, force = false) => {
   // TODO: Ensure no phonebook entries are using the field, if they are, drop them.
   // Delete a phonebook field
   const field = await get_phonebook_field(id);
@@ -71,8 +71,10 @@ export const delete_phonebook_field = async (id) => {
   }
   
   if (field.created_by_system) {
-    logger.warn(`delete_phonebook_field: check field: field ${id} (${field.name}) was created by the system and cannot be deleted!`);
-    return { error: "field_created_by_system" };
+    if (!force) {
+      logger.warn(`delete_phonebook_field: check field: field ${id} (${field.name}) was created by the system and cannot be deleted!`);
+      return { error: "field_created_by_system" };
+    }
   }
 
   logger.info(`delete_phonebook_field: deleted phonebook field ${field.id} (${field.name})`);

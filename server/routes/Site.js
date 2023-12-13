@@ -31,6 +31,9 @@ import {
 // Import phonebook router, as phonebooks are downstream of sites.
 import { router as phonebook_management_router } from './Phonebook'
 
+// Import phonebook field router, as phonebook fields are downstream of sites.
+import { router as phonebook_field_management_router } from './Fields'
+
 export const router = Router({ mergeParams: true });
 
 router.get("/", get_and_validate_session, async (req, res) => {
@@ -172,3 +175,4 @@ router.delete("/:site_id/authorise/:user_id", get_and_validate_session, is_root,
 
 // Register phonebook management endpoints
 router.use("/:site_id/phonebook", get_and_validate_session, is_authorised_on_site, phonebook_management_router);
+router.use("/:site_id/field", get_and_validate_session, is_authorised_on_site, phonebook_field_management_router)

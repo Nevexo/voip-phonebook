@@ -8,8 +8,7 @@ import { Schema, model } from "mongoose";
 import { nanoid } from 'nanoid';
 import { PhonebookContainer } from "./Phonebook";
 import { User } from "./User";
-import { PhonebookEntryField } from "./PhonebookEntryField";
-import { PhonebookColumn } from "./PhonebookColumn";
+import { PhonebookField } from "./PhonebookField";
 
 export const phonebookRowSchema = new Schema({
   id: {
@@ -23,7 +22,17 @@ export const phonebookRowSchema = new Schema({
     required: false,
   },
   fields: {
-    type: [PhonebookColumn],
+    type: [{
+      "field": {
+        type: Schema.Types.ObjectId,
+        ref: PhonebookField,
+        required: true,
+      },
+      "value": {
+        type: String,
+        required: true,
+      }
+    }],
     required: false, // Some fields will be required, but this is set in the field schema.
   },
   phonebook_container: {
@@ -42,4 +51,4 @@ export const phonebookRowSchema = new Schema({
   },
 });
 
-export const PhonebookEntry = model('PhonebookRow', phonebookRowSchema);
+export const PhonebookRow = model('PhonebookRow', phonebookRowSchema);

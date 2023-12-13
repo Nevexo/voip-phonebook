@@ -83,9 +83,27 @@ export const rename_site = async (id, new_name) => {
 
 export const delete_site = async (id) => {
   // Delete a site
-
   const site = await get_site(id);
   if (!site) return undefined;
+
+  // Check for any phonebooks
+  const phonebooks = await get_phonebooks_by_site(id);
+  if (phonebooks.length > 0) {
+    logger.warn(`delete_site: check phonebooks: site ${id} has phonebooks!`);
+    return { error: "site_has_phonebooks" };
+  }
+
+  // Check for any phonebook fields that are not marked system_created
+  const fields = await get_phonebook_fields_for_site(id);
+  if (fields.some(f => !f.created_by_system)) {
+    logger.warn(`delete_site: check phonebook fields: site ${id} has non-system-created fields!`);
+    return { error: "site_has_non_system_created_fields" };
+  }
+
+  // Delete all system fields
+  for (const field of fields) {
+    await delete_phonebook_field(field.id);
+  }
 
   await Site.deleteOne({ id: id });
   return site;

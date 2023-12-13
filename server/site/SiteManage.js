@@ -6,6 +6,9 @@ import { Site } from "../types/Site";
 import { logger } from "../index";
 import { get_user } from "../auth/Users";
 
+import { create_phonebook_field, get_phonebook_fields_for_site, delete_phonebook_field } from "../fields/PhonebookFieldManager";
+import { get_phonebooks_by_site } from "../phonebook/BookManage";
+
 export const get_site = async (id) => {
   // Get a specific site
 
@@ -54,6 +57,16 @@ export const create_site = async (name, authorised_users, created_by) => {
   });
 
   await site.save();
+  logger.info(`create_site: created site ${site.id} (${site.name})`)
+
+  // Create default site fields
+  // TODO: Make this dynamic.
+
+  logger.debug(`create_site: creating default site fields for site ${site.id} (${site.name})`);
+  await create_phonebook_field(site.id, "First Name", "text", true, true);
+  await create_phonebook_field(site.id, "Last Name", "text", true, true);
+  await create_phonebook_field(site.id, "Phone Number", "number", true, true);
+
   return site;
 }
 

@@ -18,23 +18,6 @@ import {
   delete_phonebook,
 } from "../phonebook/BookManage.js";
 
-import {
-  get_user
-} from "../auth/Users.js";
-
-import {
-  get_and_validate_session,
-  is_root
-} from "../middleware/Authentication.js";
-
-import {
-  is_authorised_on_site
-} from "../middleware/SiteAuthorisation.js";
-
-import {
-  get_site
-} from "../site/SiteManage.js";
-
 export const router = Router({ mergeParams: true });
 
 router.get("/", async (req, res) => {

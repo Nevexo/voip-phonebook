@@ -1,7 +1,13 @@
 // voip-phonebook - Phonebook Field Schema
-// This schema defines a phonebook field, which is assigned to a phonebook group.
-// Phonebook fields shouldn't include the contact name or remark, as these are defined in the phonebook entry.
-// Two defaults will be created whenever a new phonebook is created: home & mobile.
+
+// This schema defines a phonebook field, which is assigned to a site, and can be used in any of the site's
+// phonebooks. Three default fields are created for each site: Name, Number and Remark.
+// Fields can be required in every entry, or optional.
+
+// As fields may not necessarily line up with the field name specified by a vendor (i.e., number may be mobile_number)
+// the vendor connector must translate between site fields and vendor fields.
+// This is done in the vendor entitlement configuration.
+
 // (c) Cameron Fleming 2023.
 
 import { Schema, model } from "mongoose";
@@ -20,7 +26,12 @@ export const phonebookFieldSchema = new Schema({
     type: String,
     required: true,
   },
-  phonebook_container: {
+  required: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  site: {
     type: Schema.Types.ObjectId,
     ref: PhonebookContainer,
     required: true,

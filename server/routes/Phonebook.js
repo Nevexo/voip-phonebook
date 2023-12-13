@@ -18,6 +18,8 @@ import {
   delete_phonebook,
 } from "../phonebook/BookManage.js";
 
+import { router as entry_router } from "./Entries.js";
+
 export const router = Router({ mergeParams: true });
 
 router.get("/", async (req, res) => {
@@ -127,3 +129,6 @@ router.delete("/:phonebook_id", async (req, res) => {
 
   return res.status(200).json({ success: true });
 });
+
+// Register routes from entries manager.
+router.use("/:phonebook_id/entry", entry_router);

@@ -19,7 +19,8 @@ export const phonebookContainerSchema = new Schema({
     required: true,
   },
   site: {
-    type: Site,
+    type: Schema.Types.ObjectId,
+    ref: Site,
     required: true,
   },
   created_at: {

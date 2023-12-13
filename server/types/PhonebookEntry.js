@@ -34,7 +34,8 @@ export const phonebookEntrySchema = new Schema({
     required: true,
   },
   created_by: {
-    type: User,
+    type: Schema.Types.ObjectId,
+    ref: User,
     required: true,
   },
   created_at: {

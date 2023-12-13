@@ -1,5 +1,6 @@
-// voip-phonebook - Phonebook Entry Schema
+// voip-phonebook - Phonebook Entry row schema
 // This schema defines a phonebook entry, which is assigned to a phonebook group.
+// Each row will have columns, which contain information linked to the row.
 // (c) Cameron Fleming 2023.
 
 import { Schema, model } from "mongoose";
@@ -7,26 +8,23 @@ import { Schema, model } from "mongoose";
 import { nanoid } from 'nanoid';
 import { PhonebookContainer } from "./Phonebook";
 import { User } from "./User";
+import { PhonebookEntryField } from "./PhonebookEntryField";
+import { PhonebookColumn } from "./PhonebookColumn";
 
-export const phonebookEntrySchema = new Schema({
+export const phonebookRowSchema = new Schema({
   id: {
     type: String,
     default: () => nanoid(10),
     required: true,
     unique: true,
   },
-  name: {
-    type: String,
-    required: true,
-  },
   remark: {
     type: String,
     required: false,
   },
   fields: {
-    type: Map,
-    required: true,
-    default: {},
+    type: [PhonebookColumn],
+    required: false, // Some fields will be required, but this is set in the field schema.
   },
   phonebook_container: {
     type: Schema.Types.ObjectId,
@@ -44,4 +42,4 @@ export const phonebookEntrySchema = new Schema({
   },
 });
 
-export const PhonebookEntry = model('PhonebookEntry', phonebookEntrySchema);
+export const PhonebookEntry = model('PhonebookRow', phonebookRowSchema);

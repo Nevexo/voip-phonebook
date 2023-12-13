@@ -128,7 +128,22 @@ router.delete("/:site_id", get_and_validate_session, is_root, async (req, res) =
     return res.status(404).json({ error: "site_does_not_exist" });
   }
 
-  await delete_site(req.params.site_id);
+  const result = await delete_site(req.params.site_id);
+  if (result.error) {
+    switch(result.error) {
+      case "site_does_not_exist":
+        return res.status(404).json({ error: "site_does_not_exist" });
+      case "site_has_phonebooks":
+        return res.status(400).json({ error: "site_has_phonebooks", 
+        message: "This site has phonebooks assigned to it, delete or migrate them first."});
+      case "site_has_non_system_created_fields":
+        return res.status(400).json({ error: "site_has_non_system_created_fields",
+        message: "This site has non-system-created fields, delete them first."});
+      default:
+        return res.status(500).json({ error: result.error });
+    }
+  }
+  
   return res.status(200).json({ success: true });
 })
 

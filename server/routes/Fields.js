@@ -31,7 +31,8 @@ router.get("/", async (req, res) => {
       name: field.name,
       type: field.type,
       required: field.required,
-      created_at: field.created_at
+      created_at: field.created_at,
+      created_by_system: field.created_by_system
     })
   }
 
@@ -51,7 +52,8 @@ router.get("/:field_id", async (req, res) => {
     name: field.name,
     type: field.type,
     required: field.required,
-    created_at: field.created_at
+    created_at: field.created_at,
+    created_by_system: field.created_by_system
   });
 });
 
@@ -85,7 +87,8 @@ router.post("/", async (req, res) => {
     name: field.name,
     type: field.type,
     required: field.required,
-    created_at: field.created_at
+    created_at: field.created_at,
+    created_by_system: field.created_by_system
   });
 });
 

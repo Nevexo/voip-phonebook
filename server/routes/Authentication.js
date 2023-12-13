@@ -18,7 +18,7 @@ import {
 import { logger } from "../index";
 import { get_and_validate_session } from "../middleware/Authentication.js";
 
-export const router = Router();
+export const router = Router({ mergeParams: true });
 
 router.post("/session", async (req, res) => {
   // Login a user.

@@ -19,7 +19,7 @@ import {
 import { get_and_validate_session, is_root } from "../middleware/Authentication.js";
 import { logger } from "../index";
 
-export const router = Router();
+export const router = Router({ mergeParams: true });
 
 router.post("/", get_and_validate_session, is_root, async (req, res) => {
   // Create a new user

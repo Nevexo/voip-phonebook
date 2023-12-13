@@ -28,7 +28,10 @@ import {
   is_authorised_on_site
 } from "../middleware/SiteAuthorisation.js";
 
-export const router = Router();
+// Import phonebook router, as phonebooks are downstream of sites.
+import { router as phonebook_management_router } from './Phonebook'
+
+export const router = Router({ mergeParams: true });
 
 router.get("/", get_and_validate_session, async (req, res) => {
   // List all sites for this user, or all sites if the user is root.
@@ -166,3 +169,6 @@ router.delete("/:site_id/authorise/:user_id", get_and_validate_session, is_root,
 
   return res.status(200).json({ success: true, message: "Successfully removed user authorisation." });
 })
+
+// Register phonebook management endpoints
+router.use("/:site_id/phonebook", get_and_validate_session, is_authorised_on_site, phonebook_management_router);

@@ -135,6 +135,7 @@ const main = async () => {
   express_app.use('/auth', authentication_router)
   express_app.use('/user', user_maangement_router)
   express_app.use('/site', site_management_router)
+  // Phonebooks are a subroute of sites, so they are loaded downstream of site.
   
   // Setup manifest route
   express_app.get('/manifest.json', (req, res) => {
@@ -154,6 +155,7 @@ const main = async () => {
   express_app.use((req, res) => {
     res.status(404).json({ error: "not_found" })
   })
+
   // Start express server
   if (!process.env.API_LISTEN_PORT) {
     logger.warn('API_LISTEN_PORT not set, using 8080.')

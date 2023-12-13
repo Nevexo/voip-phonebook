@@ -72,7 +72,7 @@ export const delete_phonebook_field = async (id) => {
   
   if (field.created_by_system) {
     logger.warn(`delete_phonebook_field: check field: field ${id} (${field.name}) was created by the system and cannot be deleted!`);
-    return { error: "field_created_by_system, cannot delete" };
+    return { error: "field_created_by_system" };
   }
 
   logger.info(`delete_phonebook_field: deleted phonebook field ${field.id} (${field.name})`);

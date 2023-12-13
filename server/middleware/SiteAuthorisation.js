@@ -21,6 +21,6 @@ export const is_authorised_on_site = async (req, res, next) => {
   }
 
   // Continue.
-  logger.debug("middleware: site_authorisation: is_authorised_on_site: user is authorised on site, continuing")
+  logger.debug(`middleware: site_authorisation: is_authorised_on_site: user ${req.user.name} is authorised on site, continuing`)
   next()
 }

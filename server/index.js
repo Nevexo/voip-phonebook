@@ -122,6 +122,13 @@ const main = async () => {
 
   logger.debug("frontend_socket: started on port " + process.env.FRONTEND_SERVICE_SOCKET_PORT)
   await frontend_service_socket.listen(process.env.FRONTEND_SERVICE_SOCKET_PORT)
+  
+  // Set x-api-version header and x-powered-by
+  express_app.use((req, res, next) => {
+    res.set('x-api-version', package_version)
+    res.set('x-powered-by', "voip-phonebook")
+    next()
+  })
 
   // Load routes
   logger.debug("router: preparing routes")
@@ -129,6 +136,24 @@ const main = async () => {
   express_app.use('/user', user_maangement_router)
   express_app.use('/site', site_management_router)
   
+  // Setup manifest route
+  express_app.get('/manifest.json', (req, res) => {
+    res.status(200).json({
+      name: "voip-phonebook",
+      version: package_version,
+      description: "A microservice-ish based phonebook platform.",
+    });
+  });
+
+  // Redirect / to manifest.json
+  express_app.get('/', (req, res) => {
+    res.redirect('/manifest.json')
+  })
+
+  // Handle all 404s with a JSON response.
+  express_app.use((req, res) => {
+    res.status(404).json({ error: "not_found" })
+  })
   // Start express server
   if (!process.env.API_LISTEN_PORT) {
     logger.warn('API_LISTEN_PORT not set, using 8080.')

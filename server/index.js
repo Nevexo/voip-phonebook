@@ -33,8 +33,14 @@ import { router as user_maangement_router } from './routes/UserManagement'
 import { router as site_management_router } from './routes/Site'
 
 // Setup socket.io and export the instance
-export const vendor_service_socket = new Server()
+export const vendor_service_socket = new Server({
+  cors: {
+    origin: "*"
+  }
+})
 export const frontend_service_socket = new Server()
+
+import { setup_socket_handlers } from './vendors/VendorSocket'
 
 // Setup event emitter and export the instance
 export const event_emitter = new EventEmitter()
@@ -117,6 +123,17 @@ const main = async () => {
     process.env.FRONTEND_SERVICE_SOCKET_PORT = '3001'
   }
 
+  if (!process.env.VENDOR_SERVICE_API_KEY) {
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    logger.warn('VENDOR_SERVICE_API_KEY IS NOT SET')
+    logger.warn('use the following command to generate a key:')
+    logger.warn('openssl rand -base64 32')
+    console.log("!!!!!")
+    logger.warn("IF YOU DO NOT SET THIS ENVIRONMENT VARIABLE, VENDOR SERVICES WILL NOT BE ABLE TO LOGIN.")
+    logger.warn("You may set this key without reloading voip-phonebook, set it now!")
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+  }
+
   logger.debug("vendor_socket: started on port " + process.env.VENDOR_SERVICE_SOCKET_PORT)
   await vendor_service_socket.listen(process.env.VENDOR_SERVICE_SOCKET_PORT)
 
@@ -166,6 +183,9 @@ const main = async () => {
   await express_app.listen(process.env.API_LISTEN_PORT)
 
   logger.info("voip-phonebook server ready.")
+
+  // Setup socketio event handlers
+  await setup_socket_handlers();
 }
 
 main().catch((err) => {

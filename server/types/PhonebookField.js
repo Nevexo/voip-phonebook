@@ -10,10 +10,12 @@
 
 // (c) Cameron Fleming 2023.
 
+// Types must be: text, number, email, or boolean.
+
 import { Schema, model } from "mongoose";
 
 import { nanoid } from 'nanoid';
-import { PhonebookContainer } from "./Phonebook";
+import { Site } from "./Site";
 
 export const phonebookFieldSchema = new Schema({
   id: {
@@ -26,6 +28,12 @@ export const phonebookFieldSchema = new Schema({
     type: String,
     required: true,
   },
+  type: {
+    type: String,
+    required: false,
+    default: "text",
+    enum: ["text", "number", "email", "bool"],
+  },
   required: {
     type: Boolean,
     required: true,
@@ -33,8 +41,13 @@ export const phonebookFieldSchema = new Schema({
   },
   site: {
     type: Schema.Types.ObjectId,
-    ref: PhonebookContainer,
+    ref: Site,
     required: true,
+  },
+  created_by_system: {
+    type: Boolean,
+    required: true,
+    default: false,
   },
   created_at: {
     type: Date,

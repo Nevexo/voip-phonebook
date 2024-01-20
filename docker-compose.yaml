@@ -1,10 +1,31 @@
 version: '3.8'
 
+networks:
+  vendor_services:
+    driver: bridge
+
 services:
   mongodb:
     image: mongo
     volumes:
       - phonebook_mongodb_data:/data/db
+
+  phonebook:
+    build: ./server
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongodb
+    # networks:
+    #   - vendor_services
+    environment:
+      - "VENDOR_SERVICE_SOCKET_PORT=3000"
+      - "FRONTEND_SERVICE_SOCKET_PORT=3001"
+      - "API_LISTEN_PORT=8080"
+      - "LOG_LEVEL=info"
+      - "MONGO_URI=mongodb://mongodb:27017/phonebook"
+      - "VENDOR_SERVICE_API_KEY=qaTzaT5UkfoeXbOjZD+osPdPWhIOj7NKth5bMGD5VaY=" # CHANGE THIS!
+      - "VENDOR_SERVICE_DEBUG=false"
 
 volumes:
   phonebook_mongodb_data:

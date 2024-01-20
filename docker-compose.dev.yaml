@@ -4,3 +4,11 @@ services:
   mongodb:
     ports:
       - 27017:27017
+
+  phonebook:
+    ports:
+      - 3000:3000
+      - 3001:3001
+    environment:
+      - "LOG_LEVEL=debug"
+      - "VENDOR_SERVICE_DEBUG=true"

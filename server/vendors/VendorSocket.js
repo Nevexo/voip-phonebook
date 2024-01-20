@@ -18,6 +18,8 @@
 // The configuration and required fields are defined by the vendor service, and stored in the database following the
 // first check-in.
 
+// See doc/vendor_services
+
 // A vendor service is able to update its configuration and required fields at startup, if a vendor service update
 // renders an entitlement invalid, the entitlement will be paused and the user will be notified.
 
@@ -90,7 +92,16 @@ const handle_provision_request = async (socket, data) => {
     // Check if required_fields or configuration has changed, without a version bump.
     if (vendor_service.version === data.version) {
       // Check if supported_fields has changed
-      if (JSON.stringify(vendor_service.supported_fields) !== JSON.stringify(data.supported_fields)) {
+      // Remove any mongodb specific fields
+      const vendor_service_fields = vendor_service.supported_fields.map(field => {
+        field = {
+          name: field.name,
+          required: field.required,
+          remark: field.remark,
+        };
+        return field;
+      });
+      if (JSON.stringify(vendor_service_fields) !== JSON.stringify(data.supported_fields)) {
         logger.warn(`handle_provision_request: ${socket.id}: vendor service ${vendor_service.name} has changed supported_fields without a version bump, disconnecting.`)
         socket.emit("provision_failed", { error: "supported_fields_changed_without_version_change" });
         await socket.disconnect();
@@ -232,7 +243,7 @@ export const setup_socket_handlers = () => {
     logger.info("VENDOR_SERVICE_DEBUG is set, creating cron jobs.")
     // Create cron job to log connected services
     new CronJob("*/10 * * * * *", () => {
-      logger.debug(`setup_socket_handlers: connected_services: ${connected_services.map(service => service.name)}`)
+      logger.debug(`setup_socket_handlers: connected_services: ${connected_services.map(service => service.name + ":" + service.status).join(", ")}`)
     }, null, true)
   }
   vendor_service_socket.on('connection', async (socket) => {

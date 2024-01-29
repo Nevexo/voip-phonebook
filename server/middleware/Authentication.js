@@ -13,7 +13,12 @@ export const get_and_validate_session = async (req, res, next) => {
     return res.status(400).json({ error: "missing_authorization_header" })
   }
 
-  const session = await validate_session(req.headers['authorization'])
+  if (!req.headers['authorization'].startsWith("Bearer ")) {
+    return res.status(401).json({ error: "invalid_token_format", message: "Expected bearer token." })
+  }
+
+  const auth_token = req.headers['authorization'].replace("Bearer ", "")
+  const session = await validate_session(auth_token)
   if (session.error) {
     return res.status(401).json({ error: session.error })
   }

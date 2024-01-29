@@ -38,7 +38,11 @@ export const vendor_service_socket = new Server({
     origin: "*"
   }
 })
-export const frontend_service_socket = new Server()
+export const frontend_service_socket = new Server({
+  cors: {
+    origin: "*"
+  }
+})
 
 import { setup_socket_handlers } from './vendors/VendorSocket'
 

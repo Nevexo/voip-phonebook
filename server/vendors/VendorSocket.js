@@ -251,3 +251,14 @@ export const setup_socket_handlers = () => {
     await socket_bind(socket);
   })
 }
+
+export const get_vendor_service_state = (service_name) => {
+  // Get the current state of a vendor service.
+  // It'll exist in this module if it's conncected, and won't if it's not.
+  // If it does exist in this service, the module is online, so return the status of the connection.
+
+  const service = connected_services.find(service => service.name === service_name);
+  logger.debug(`vendorsocket: request for state of ${service_name}: ${service ? service.status : "not_connected"}`)
+  if (service) return service.status;
+  return "not_connected";
+}

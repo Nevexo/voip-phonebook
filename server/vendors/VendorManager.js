@@ -5,22 +5,38 @@
 import { logger } from "../index";
 
 import { VendorService } from "../types/VendorService";
+import { get_vendor_service_state } from "./VendorSocket";
 
 export const get_services = async () => {
-  return await VendorService.find();
+  const vendors = await VendorService.find().lean();
+
+  // Add status to all services.
+  for (let i = 0; i < vendors.length; i++) {
+    vendors[i].status = await get_vendor_service_state(vendors[i].name);
+  }
+
+  return vendors;
 }
 
 export const get_service_by_id = async (id) => {
-  return await VendorService.findOne({ id: id });
+  const service = await VendorService.findOne({ id: id });
+  if (!service) return undefined
+
+  service.status = await get_vendor_service_state(service.name);
+  return service;
 }
 
 export const get_service_by_name = async (name) => {
-  return await VendorService.findOne({ name: name });
+  const service = await VendorService.findOne({ name: name }).lean();
+  if (!service) return undefined
+
+  service.status = await get_vendor_service_state(service.name);
+  return service;
 }
 
 export const create_service = async (name, friendly_name, supported_fields, version) => {
   // Check a service with this name doesn't already exist.
-  const existing_service = await VendorService.findOne({ name: name });
+  const existing_service = await VendorService.findOne({ name: name }).lean();
   if (existing_service) return { error: "service_already_exists" };
 
   const service = new VendorService({
@@ -49,9 +65,9 @@ export const update_service = async (name, friendly_name, supported_fields, vers
   return existing_service;
 }
 
-export const delete_service = async (name) => {
+export const delete_service = async (id) => {
   // Check a service with this name doesn't already exist.
-  const existing_service = await VendorService.findOne({ name: name });
+  const existing_service = await VendorService.findOne({ id: id });
   if (!existing_service) return { error: "service_does_not_exist" };
 
   logger.info(`delete_service: deleted service ${existing_service.id} (${existing_service.name})`)

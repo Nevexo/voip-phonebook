@@ -137,7 +137,7 @@ export const delete_entitlement = async (entitlement_id) => {
 }
 
 export const get_entitlement_by_access_key = async (access_key) => {
-  return await VendorServiceEntitlement.findOne({ access_key: access_key });
+  return await VendorServiceEntitlement.findOne({ access_key: access_key }).populate("vendor_service").populate("site");
 }
 
 export const pause_entitlement = async (entitlement_id) => {

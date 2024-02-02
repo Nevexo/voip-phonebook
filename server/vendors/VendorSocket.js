@@ -267,6 +267,41 @@ export const revoke_entitlement_from_vendor = async (entitlement) => {
   }
 }
 
+// Get phonebooks for this entitlement
+export const handle_phonebook_list_request = async (data, callback) => {
+  if (data.access_key == undefined) return await callback({"error": "missing_access_key"});
+  const entitlement = await get_entitlement_by_access_key(data.access_key);
+  if (!entitlement) return await callback({"error": "invalid_access_key"});
+
+  // Check entitlement is available
+  if (entitlement.entitlement_status !== "available") return await callback({"error": "entitlement_not_available"});
+  
+  // Get all phonebooks for site
+  const phonebooks = await get_phonebooks_by_site(entitlement.site.id);
+  await callback({ phonebooks: phonebooks });
+}
+
+// Get phonebook for an entitlement
+export const handle_get_phonebook_entries = async (data, callback) => {
+  if (data.access_key == undefined) return await callback({"error": "missing_access_key"});
+  if (data.phonebook_id == undefined) return await callback({"error": "missing_phonebook_id"});
+
+  const entitlement = await get_entitlement_by_access_key(data.access_key);
+  if (!entitlement) return await callback({"error": "invalid_access_key"});
+
+  // Check entitlement is available
+  if (entitlement.entitlement_status !== "available") return await callback({"error": "entitlement_not_available"});
+  
+  // Get the phonebook
+  const phonebook = await get_phonebook(data.phonebook_id);
+  if (!phonebook) return await callback({"error": "phonebook_does_not_exist"});
+  if (phonebook.site.id != entitlement.site.id) return await callback({"error": "phonebook_does_not_exist"});
+  
+  // Get phonebook entries
+  const entries = await get_phonebook_entries(phonebook.id);
+  if (!entries) return await callback({"error": "could_not_resolve_entries"});
+
+  await callback({ phonebook: phonebook, entries: entries });
 }
 
 // Socket setup
@@ -342,6 +377,9 @@ const socket_bind = async (socket) => {
   socket.on('entitlement_update', async (data) => {
     await handle_entitlement_update(socket, data);
   })
+
+  socket.on('get_available_phonebooks', handle_phonebook_list_request);
+  socket.on('get_phonebook', handle_get_phonebook_entries);
 }
 
 export const setup_socket_handlers = () => {

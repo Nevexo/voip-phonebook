@@ -102,7 +102,6 @@ router.post("/", get_and_validate_session, is_root, async (req, res) => {
     id: site.id,
     name: site.name,
     authorised_users: site.authorised_users.map(u => u.id),
-    created_by: site.created_by.id,
     created_at: site.created_at
   });
 })

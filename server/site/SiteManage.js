@@ -12,7 +12,7 @@ import { get_phonebooks_by_site } from "../phonebook/BookManage";
 export const get_site = async (id) => {
   // Get a specific site
 
-  const site = await Site.findOne({ id: id }).populate("authorised_users").populate("created_by");
+  const site = await Site.findOne({ id: id }).populate("authorised_users").populate("created_by", "id username root_user");
   if (!site) return undefined;
 
   return site;
@@ -21,7 +21,7 @@ export const get_site = async (id) => {
 export const get_sites = async () => {
   // Get all sites
 
-  const sites = await Site.find().populate("authorised_users").populate("created_by");
+  const sites = await Site.find().populate("authorised_users").populate("created_by", "id username root_user");
   return sites;
 }
 

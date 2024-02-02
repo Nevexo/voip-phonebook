@@ -45,9 +45,9 @@ export const create_site = async (name, authorised_users, created_by) => {
     const user_object = await get_user(user)
     if (!user_object) {
       logger.warn(`create_site: check authorised_users: user ${user} does not exist!`);
-      authorised_users_object.push(user_object);
       return { error: "authorised_user_does_not_exist", user: user };
     }
+    authorised_users_object.push(user_object);
   }
 
   const site = new Site({

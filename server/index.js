@@ -31,6 +31,7 @@ import { get_user_safe, get_all_users, create_user } from './auth/Users';
 import { router as authentication_router } from './routes/Authentication'
 import { router as user_maangement_router } from './routes/UserManagement'
 import { router as site_management_router } from './routes/Site'
+import { router as vendor_management_router } from './routes/Vendors'
 
 // Setup socket.io and export the instance
 export const vendor_service_socket = new Server({
@@ -156,6 +157,7 @@ const main = async () => {
   express_app.use('/auth', authentication_router)
   express_app.use('/user', user_maangement_router)
   express_app.use('/site', site_management_router)
+  express_app.use('/vendor', vendor_management_router)
   // Phonebooks are a subroute of sites, so they are loaded downstream of site.
   
   // Setup manifest route

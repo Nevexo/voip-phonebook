@@ -91,10 +91,80 @@ const main = async () => {
 
   socket.on('provision_entitlements', async (operand) => {
     entitlements = operand.entitlements;
-    logger.debug(`Received entitlements: ${entitlements}`)
+
+    logger.info("Received entitlements:")
+    for (let i = 0; i < entitlements.length; i++) {
+      logger.info(`Entitlement ${i}: ${entitlements[i].id} for site ${entitlements[i].site.name}`)
+
+      // Update existing metadata, this is just a test, but proves that allowing 
+      // automatic upgrading is possible within vendor services.
+      entitlements[i].metadata['load_time'] = new Date().toISOString();
+      await socket.emit("entitlement_update", {
+        "update_type": "metadata",
+        "entitlement_id": entitlements[i].id,
+        "update": {
+          "metadata": entitlements[i].metadata
+        }
+      })
+    }
+
     logger.info(`Provisioned with ${entitlements.length} entitlements, sending acceptance.`);
 
     socket.emit("provision_accept");
+  })
+
+  socket.on('new_entitlement', async (operand) => {
+    // Handle a new entitlement being sent to the service.
+    // Entitlements must be accepted or rejected, they are unusable without acceptance, so the server
+    // will not accept the access_key.
+
+    logger.info(`Received new entitlement: ${operand.entitlement.id} for site ${operand.entitlement.site.name} - accepting.`)
+    // The dummy provider simply accepts all entitlements, this is fairly safe as mappings are checked by the
+    // server, but they should be checked again by the server, in case of manifest mismatch.
+    // A failure at this point is pretty fatal, as the manifest must be wrong to allow a fault to occur here.
+
+    // Install the entitlement into the entitlements array.
+    entitlements.push(operand.entitlement);
+
+    // Accept the entitlement.
+    await socket.emit("entitlement_update", {
+      "update_type": "acceptance",
+      "entitlement_id": operand.entitlement.id,
+      "update": {
+        "accepted": true,
+      }
+    })
+
+    // Submit some blank metadata
+    await socket.emit("entitlement_update", {
+      "update_type": "metadata",
+      "entitlement_id": operand.entitlement.id,
+      "update": {
+        "metadata": {
+          "acceptance_time": new Date().toISOString(),
+          "service_phonebook_url": `https://dummy.vendor.triaromconnect.net/${operand.entitlement.id}/[phonebook]`,
+        }
+      }
+    })
+  })
+
+  socket.on('revoke_entitlement', async (operand) => {
+    // The server is revoking an existing entitlement, remove it if it exists.
+    logger.info(`Received revocation for entitlement: ${operand.entitlement_id}`)
+    
+    // Delete the entitlement from the entitlements array.
+    entitlements = entitlements.filter((entitlement) => {
+      return entitlement.id != operand.entitlement_id
+    })
+
+    // Acknowledge the revocation.
+    await socket.emit("entitlement_update", {
+      "update_type": "revokation",
+      "entitlement_id": operand.entitlement_id,
+      "update": {
+        "revoked": true,
+      }
+    })
   })
 
   // Register with voip-phonebook server

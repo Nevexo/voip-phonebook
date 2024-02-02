@@ -15,7 +15,7 @@ export const get_phonebook_entry = async (id) => {
   const entry = await PhonebookRow.findOne({ id: id })
     .populate("fields")
     .populate("phonebook_container")
-    .populate("created_by")
+    .populate("created_by", "id username root_user")
     .populate("fields.field");
 
   if (!entry) return undefined;
@@ -30,7 +30,7 @@ export const get_phonebook_entries = async (phonebook_id) => {
   const entries = await PhonebookRow.find({ phonebook_container: phonebook })
     .populate("fields")
     .populate("phonebook_container")
-    .populate("created_by")
+    .populate("created_by", "id name root_user")
     .populate("fields.field");
 
   return entries;

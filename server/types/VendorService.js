@@ -45,6 +45,27 @@ export const vendorServiceSchema = new Schema({
     required: false,
     default: [],
   },
+  site_configuration_flags: {
+    type: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        required: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        remark: {
+          type: String,
+          required: false,
+        }
+      }
+    ],
+    required: false,
+    default: [],
+  },
   version: {
     type: String,
     required: true,

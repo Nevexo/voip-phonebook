@@ -30,7 +30,11 @@ import { get_service_by_name, create_service, update_service } from "./VendorMan
 
 import { CronJob } from 'cron';
 
+import { EventEmitter } from 'events';
+
 let connected_services = [];
+
+export const event_emitter = new EventEmitter();
 
 // Helper methods
 const update_service_status = async (socket, status) => {
@@ -38,7 +42,7 @@ const update_service_status = async (socket, status) => {
   if (!service) return;
   logger.info(`update_service_status: ${socket.id}: vendor service ${service.name} status changed from ${service.status} to ${status}`)
   await socket.emit("vendor_service_state_update", { state: status });
-
+  event_emitter.emit("vendor_service_state_update", { service: service.name, state: status })
   service.status = status;
 }
 
@@ -222,10 +226,12 @@ const socket_bind = async (socket) => {
   socket.on('disconnect', async () => {
     logger.info(`socket_bind: ${socket.id}: vendor service ${vendor_service_name} disconnected.`)
     connected_services = connected_services.filter(service => service.socket.id !== socket.id)
+    event_emitter.emit("vendor_service_disconnect", { service: vendor_service_name })
   })
 
   socket.on('error', async (error) => {
     logger.error(`socket_bind: ${socket.id}: vendor service ${vendor_service_name} error: ${error}`)
+    event_emitter.emit("vendor_service_error", { service: vendor_service_name, error: error })
   })
 
   // Event handlers managed by voip-phonebook
@@ -247,6 +253,7 @@ export const setup_socket_handlers = () => {
     }, null, true)
   }
   vendor_service_socket.on('connection', async (socket) => {
+    event_emitter.emit("vendor_service_connect", { socket: socket.id })
     logger.info(`vendor_service_socket: socket session ${socket.id} connected.`)
     await socket_bind(socket);
   })

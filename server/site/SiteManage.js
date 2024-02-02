@@ -63,8 +63,8 @@ export const create_site = async (name, authorised_users, created_by) => {
   // TODO: Make this dynamic.
 
   logger.debug(`create_site: creating default site fields for site ${site.id} (${site.name})`);
-  await create_phonebook_field(site.id, "First Name", "text", true, true);
-  await create_phonebook_field(site.id, "Last Name", "text", true, true);
+  await create_phonebook_field(site.id, "Name", "text", true, true);
+  // await create_phonebook_field(site.id, "Mobile Number", "text", true, true);
 
   return site;
 }

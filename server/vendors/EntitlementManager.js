@@ -119,7 +119,7 @@ export const update_entitlement_status = async (entitlement_id, status) => {
   entitlement.entitlement_status = status;
 
   await entitlement.save();
-  logger.info(`update_entitlement_status: updated entitlement ${entitlement.id} for site ${entitlement.site} and service ${entitlement.vendor_service} status to ${status}`)
+  logger.info(`update_entitlement_status: updated entitlement ${entitlement.id} for site ${entitlement.site.name} and service ${entitlement.vendor_service.name} status to ${status}`)
   return entitlement;
 }
 
@@ -128,11 +128,58 @@ export const delete_entitlement = async (entitlement_id) => {
   const entitlement = await get_entitlement_by_id(entitlement_id);
   if (!entitlement) return { error: "entitlement_does_not_exist" };
 
-  logger.info(`delete_entitlement: deleted entitlement ${entitlement.id} for site ${entitlement.site} and service ${entitlement.vendor_service}`)
+  // Revoke the entitlement from any running vendor service instances
+  await revoke_entitlement_from_vendor(entitlement);
+
+  logger.info(`delete_entitlement: deleted entitlement ${entitlement.id} for site ${entitlement.site.name} and service ${entitlement.vendor_service.name}`)
   await VendorServiceEntitlement.deleteOne({ id: entitlement.id })
   return entitlement;
 }
 
 export const get_entitlement_by_access_key = async (access_key) => {
   return await VendorServiceEntitlement.findOne({ access_key: access_key });
+}
+
+export const pause_entitlement = async (entitlement_id) => {
+  // Pause an enabled entitlement.
+  // Revoke it from any running vendor services
+  // and set the status to paused.
+
+  await revoke_entitlement_from_vendor(entitlement_id);
+  return await update_entitlement_status(entitlement_id, "paused");
+}
+
+export const resume_entitlement = async (entitlement_id) => {
+  // Resume a paused entitlement, by setting it to setup mode and
+  // then sending it for approval.
+  const entitlement = await get_entitlement_by_id(entitlement_id);
+  if (!entitlement) return { error: "entitlement_does_not_exist" };
+
+  logger.info(`resume_entitlement: resuming entitlement ${entitlement.id} for site ${entitlement.site.name} and service ${entitlement.vendor_service.name}`)
+
+  await update_entitlement_status(entitlement_id, "setup");
+  await send_entitlement_to_vendor(entitlement);
+  return true;
+}
+
+export const update_entitlement_metadata = async (entitlement_id, metadata) => {
+  // Update the metadata for an entitlement.
+  const entitlement = await get_entitlement_by_id(entitlement_id);
+  if (!entitlement) return { error: "entitlement_does_not_exist" };
+
+  entitlement.metadata = metadata;
+  await entitlement.save();
+
+  return entitlement;
+}
+
+export const rotate_access_key = async (entitlement_id) => {
+  // Rotate the access key for an entitlement.
+  const entitlement = await get_entitlement_by_id(entitlement_id);
+  if (!entitlement) return { error: "entitlement_does_not_exist" };
+
+  entitlement.access_key = nanoid(64);
+  await entitlement.save();
+
+  return entitlement;
 }

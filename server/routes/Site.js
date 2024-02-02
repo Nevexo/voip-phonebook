@@ -101,7 +101,6 @@ router.post("/", get_and_validate_session, is_root, async (req, res) => {
   return res.status(200).json({
     id: site.id,
     name: site.name,
-    authorised_users: site.authorised_users.map(u => u.id),
     created_at: site.created_at
   });
 })

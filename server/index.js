@@ -108,7 +108,7 @@ const main = async () => {
     logger.info("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
     logger.warn("THIS PASSWORD IS ONLY SHOWN ONCE, MAKE SURE TO SAVE IT!")
     logger.info("Use the following account to login to your voip-phonebook frontend for the first time.")
-    console.log("Username: root")
+    console.log("Username: root@localhost")
     console.log(`Password: ${random_password}`)
     logger.info("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
 

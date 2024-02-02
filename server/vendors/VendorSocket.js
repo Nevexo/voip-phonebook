@@ -25,8 +25,11 @@
 
 import { logger, vendor_service_socket } from "../index";
 
-import { get_entitlement_for_vendor, update_entitlement_status, update_entitlement_metadata } from "./EntitlementManager";
+import { get_entitlement_for_vendor, update_entitlement_status, update_entitlement_metadata, get_entitlement_by_access_key } from "./EntitlementManager";
 import { get_service_by_name, create_service, update_service } from "./VendorManager";
+
+import { get_phonebooks_by_site, get_phonebook } from "../phonebook/BookManage";
+import { get_phonebook_entries } from "../phonebook_entries/EntryManager";
 
 import { CronJob } from 'cron';
 
@@ -190,23 +193,22 @@ export const send_entitlement_to_vendor = async (entitlement) => {
 
   // Submit the entitlement to the Vendor Service. A response will be sent under
   // entitlement_update, with an accept or deny.
-  await service.socket.timeout(5000).emit("new_entitlement", { entitlement: entitlement }, async (err, response) => {
-    if (err) {
-      logger.error(`send_entitlement_to_vendor: ${service.socket.id}: no response to entitlement ${entitlement.id}: ${err}`)
-      // Set to invalid
-      return await update_entitlement_status(entitlement.id, "invalid");
-    }
+  const response = await service.socket.timeout(5000).emitWithAck("new_entitlement", { entitlement: entitlement });
+  if (!response) {
+    logger.error(`send_entitlement_to_vendor: ${service.socket.id}: no response to entitlement ${entitlement.id}: ${err}`)
+    // Set to invalid
+    return await update_entitlement_status(entitlement.id, "invalid");
+  }
 
-    if (response.accepted) {
-      // Set to available
-      logger.info(`send_entitlement_to_vendor: ${service.socket.id}: entitlement ${entitlement.id} accepted.`)
-      return await update_entitlement_status(entitlement.id, "available");
-    } else {
-      // Set to invalid
-      logger.warn(`send_entitlement_to_vendor: ${service.socket.id}: entitlement ${entitlement.id} not accepted.`)
-      return await update_entitlement_status(entitlement.id, "invalid");
-    }
-  });
+  if (response.accepted) {
+    // Set to available
+    logger.info(`send_entitlement_to_vendor: ${service.socket.id}: entitlement ${entitlement.id} accepted.`)
+    return await update_entitlement_status(entitlement.id, "available");
+  } else {
+    // Set to invalid
+    logger.warn(`send_entitlement_to_vendor: ${service.socket.id}: entitlement ${entitlement.id} not accepted.`)
+    return await update_entitlement_status(entitlement.id, "invalid");
+  }
 }
 
 // Entitlement Update Methods
@@ -248,17 +250,18 @@ export const revoke_entitlement_from_vendor = async (entitlement) => {
 
   // Submit the entitlement to the Vendor Service. A response will be sent under
   // entitlement_update, with an accept or deny.
-  await service.socket.timeout(5000).emit("revoke_entitlement", { entitlement_id: entitlement.id }, (err, response) => {
-    if (err) {
-      logger.error(`revoke_entitlement_from_vendor: ${service.socket.id}: no response to revokation ${entitlement.id}: ${err}`)
-    }
+  const response = await service.socket.timeout(5000).emitWithAck("revoke_entitlement", { entitlement_id: entitlement.id });
+  if (!response) {
+    return logger.error(`revoke_entitlement_from_vendor: ${service.socket.id}: no response to revokation ${entitlement.id}: ${err}`)
+  }
 
-    if (response.acknowledged) {
-      logger.info(`revoke_entitlement_from_vendor: ${service.socket.id}: revokation ${entitlement.id} acknolodged.`)
-    } else {
-      logger.warn(`revoke_entitlement_from_vendor: ${service.socket.id}: revokation ${entitlement.id} not acknolodged.`)
-    }
-  });
+  if (response.acknowledged) {
+    return logger.info(`revoke_entitlement_from_vendor: ${service.socket.id}: revokation ${entitlement.id} acknolodged.`)
+  } else {
+    return logger.warn(`revoke_entitlement_from_vendor: ${service.socket.id}: revokation ${entitlement.id} not acknolodged.`)
+  }
+}
+
 }
 
 // Socket setup

@@ -190,7 +190,23 @@ export const send_entitlement_to_vendor = async (entitlement) => {
 
   // Submit the entitlement to the Vendor Service. A response will be sent under
   // entitlement_update, with an accept or deny.
-  await service.socket.emit("new_entitlement", { entitlement: entitlement });
+  await service.socket.timeout(5000).emit("new_entitlement", { entitlement: entitlement }, async (err, response) => {
+    if (err) {
+      logger.error(`send_entitlement_to_vendor: ${service.socket.id}: no response to entitlement ${entitlement.id}: ${err}`)
+      // Set to invalid
+      return await update_entitlement_status(entitlement.id, "invalid");
+    }
+
+    if (response.accepted) {
+      // Set to available
+      logger.info(`send_entitlement_to_vendor: ${service.socket.id}: entitlement ${entitlement.id} accepted.`)
+      return await update_entitlement_status(entitlement.id, "available");
+    } else {
+      // Set to invalid
+      logger.warn(`send_entitlement_to_vendor: ${service.socket.id}: entitlement ${entitlement.id} not accepted.`)
+      return await update_entitlement_status(entitlement.id, "invalid");
+    }
+  });
 }
 
 // Entitlement Update Methods
@@ -201,26 +217,6 @@ const handle_entitlement_update = async (socket, data) => {
 
   const entitlement = data.entitlement_id;
   switch (data.update_type) {
-    // -- Acceptance --
-    case "acceptance":
-      if (data.update.accepted) {
-        await update_entitlement_status(entitlement, "available");
-      } else {
-        await update_entitlement_status(entitlement, "invalid");
-      }
-
-      logger.info(`handle_entitlement_update: ${socket.id}: ${data.update.accepted ? "accepted" : "denied"} entitlement ${entitlement}.`)
-      break;
-
-    // -- Revokation --
-    case "revokation":
-      if (data.update.revoked) {
-        logger.info(`handle_entitlement_update: ${socket.id}: revoked entitlement ${entitlement}.`)
-      } else {
-        logger.warn(`handle_entitlement_update: ${socket.id}: vendor service sent invalid revokation update.`)
-      }
-      break;
-    
     // -- Metadata update --
     case "metadata":
       logger.info(`handle_entitlement_update: ${socket.id}: vendor service sent metadata update for entitlement ${entitlement}.`)
@@ -252,7 +248,17 @@ export const revoke_entitlement_from_vendor = async (entitlement) => {
 
   // Submit the entitlement to the Vendor Service. A response will be sent under
   // entitlement_update, with an accept or deny.
-  await service.socket.emit("revoke_entitlement", { entitlement_id: entitlement.id });
+  await service.socket.timeout(5000).emit("revoke_entitlement", { entitlement_id: entitlement.id }, (err, response) => {
+    if (err) {
+      logger.error(`revoke_entitlement_from_vendor: ${service.socket.id}: no response to revokation ${entitlement.id}: ${err}`)
+    }
+
+    if (response.acknowledged) {
+      logger.info(`revoke_entitlement_from_vendor: ${service.socket.id}: revokation ${entitlement.id} acknolodged.`)
+    } else {
+      logger.warn(`revoke_entitlement_from_vendor: ${service.socket.id}: revokation ${entitlement.id} not acknolodged.`)
+    }
+  });
 }
 
 // Socket setup

@@ -113,7 +113,7 @@ const main = async () => {
     socket.emit("provision_accept");
   })
 
-  socket.on('new_entitlement', async (operand) => {
+  socket.on('new_entitlement', async (operand, callback) => {
     // Handle a new entitlement being sent to the service.
     // Entitlements must be accepted or rejected, they are unusable without acceptance, so the server
     // will not accept the access_key.
@@ -127,13 +127,7 @@ const main = async () => {
     entitlements.push(operand.entitlement);
 
     // Accept the entitlement.
-    await socket.emit("entitlement_update", {
-      "update_type": "acceptance",
-      "entitlement_id": operand.entitlement.id,
-      "update": {
-        "accepted": true,
-      }
-    })
+    await callback({accepted: true})
 
     // Submit some blank metadata
     await socket.emit("entitlement_update", {
@@ -148,7 +142,7 @@ const main = async () => {
     })
   })
 
-  socket.on('revoke_entitlement', async (operand) => {
+  socket.on('revoke_entitlement', async (operand, callback) => {
     // The server is revoking an existing entitlement, remove it if it exists.
     logger.info(`Received revocation for entitlement: ${operand.entitlement_id}`)
     
@@ -158,13 +152,7 @@ const main = async () => {
     })
 
     // Acknowledge the revocation.
-    await socket.emit("entitlement_update", {
-      "update_type": "revokation",
-      "entitlement_id": operand.entitlement_id,
-      "update": {
-        "revoked": true,
-      }
-    })
+    await callback({"acknowledged": true});
   })
 
   // Register with voip-phonebook server

@@ -16,8 +16,8 @@ services:
       - 8080:8080
     depends_on:
       - mongodb
-    # networks:
-    #   - vendor_services
+    networks:
+      - vendor_services
     environment:
       - "VENDOR_SERVICE_SOCKET_PORT=3000"
       - "FRONTEND_SERVICE_SOCKET_PORT=3001"

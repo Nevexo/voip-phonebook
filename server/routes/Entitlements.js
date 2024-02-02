@@ -14,7 +14,8 @@ import {
   get_entitlement_by_id, 
   create_entitlement, 
   update_entitlement,
-  get_entitlements_for_site
+  get_entitlements_for_site,
+  delete_entitlement
 } from "../vendors/EntitlementManager";
 
 export const router = Router({ mergeParams: true });
@@ -59,4 +60,23 @@ router.post("/", async (req, res) => {
   }
 
   return res.status(201).json(entitlement);
+});
+
+router.delete("/:entitlement_id", async (req, res) => {
+  // Delete an entitlement.
+  const entitlement = await get_entitlement_by_id(req.params.entitlement_id);
+  if (!entitlement) {
+    return res.status(404).json({ error: "entitlement_does_not_exist" });
+  }
+
+  if (entitlement.site.id !== req.params.site_id) {
+    return res.status(403).json({ error: "entitlement_does_not_exist_on_site" });
+  }
+
+  const result = await delete_entitlement(entitlement.id);
+  if (result.error) {
+    return res.status(400).json({ error: result.error });
+  }
+
+  return res.status(204).send();
 });

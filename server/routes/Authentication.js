@@ -37,7 +37,7 @@ router.post("/session", async (req, res) => {
 
   // Check if the password is correct.
   if (!await verify_user_password(user.id, req.body.password)) {
-    return res.status(401).json({ error: "incorrect_password" })
+    return res.status(401).json({ error: "user_does_not_exist" })
   }
 
   // Create a new session.

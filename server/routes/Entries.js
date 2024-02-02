@@ -89,7 +89,7 @@ router.post("/", async (req, res) => {
   const entry = await create_phonebook_entry(req.params.phonebook_id, req.user.id, req.body.fields);
 
   if (entry.error) {
-    return res.status(400).json({ error: entry.error });
+    return res.status(400).json({ error: entry.error, message: entry.message || undefined });
   }
 
   return res.status(200).json({

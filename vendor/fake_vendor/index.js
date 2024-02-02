@@ -110,7 +110,9 @@ const main = async () => {
 
     logger.info(`Provisioned with ${entitlements.length} entitlements, sending acceptance.`);
 
-    socket.emit("provision_accept");
+    await socket.emit("provision_accept");
+
+    await test(socket);
   })
 
   socket.on('new_entitlement', async (operand, callback) => {
@@ -178,6 +180,42 @@ const main = async () => {
   express_app.listen(process.env.LISTEN_PORT || 3000, () => {
     logger.info(`API server listening on port ${process.env.LISTEN_PORT || 3000}.`)
   })
+}
+
+const test = async (socket) => {
+  // This method is called once setup is compelte.
+  // let phonebooks = [];
+  // await socket.timeout(5000).emit("get_available_phonebooks", {
+  //   "access_key": entitlements[0].access_key
+  // }, async (err, response) => {
+  //   if (err) return logger.error(`Failed to get phonebooks: ${err}`);
+  //   logger.info("available phonebooks: ")
+  //   phonebooks = response.phonebooks
+  //   for (let i = 0; i < phonebooks.length; i++) {
+  //     logger.info(`Phonebook ${i}: ${phonebooks[i].id} - ${phonebooks[i].name}`)
+  //   }
+  // })
+
+  const response = await socket.timeout(5000).emitWithAck("get_available_phonebooks", {
+    "access_key": entitlements[0].access_key
+  });
+
+  if (!response) {
+    return logger.error("failed to get phonebooks");
+  }
+  const phonebooks = response.phonebooks;
+
+  // Get content of first phonebook
+  const response_entries = await socket.timeout(5000).emitWithAck("get_phonebook", {
+    "access_key": entitlements[0].access_key,
+    "phonebook_id": phonebooks[0].id
+  });
+
+  if (!response_entries) {
+    return logger.error("failed to get phonebook entries");
+  }
+
+  console.dir(response_entries.entries, { depth: null });
 }
 
 main();

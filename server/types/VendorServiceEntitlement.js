@@ -51,6 +51,11 @@ export const vendorServiceEntitlementSchema = new Schema({
     required: false,
     default: {},
   },
+  metadata: {
+    type: Object,
+    required: false,
+    default: {},
+  },
   access_key: {
     type: String,
     required: true,

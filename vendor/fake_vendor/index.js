@@ -7,6 +7,8 @@ import io from 'socket.io-client';
 import { EventEmitter } from 'events';
 import cors from 'cors'
 
+let socket;
+
 const service_manifest = {
   name: "fakevendor",
   friendly_name: "Fake Vendor Service",
@@ -57,6 +59,114 @@ export const logger = winston.createLogger({
 const express_app = express();
 express_app.use(cors());
 
+// -- Express Routes --
+express_app.get("/", (req, res) => {
+  res.status(200).json({
+    "service_state": service_state,
+    "entitlements": entitlements.length,
+    "manifest": service_manifest
+  })
+})
+
+express_app.get("/entitlement/:entitlement_id/book/:phonebook_id/json", async (req, res) => {
+  // Get a JSON copy of the phonebook from the server.
+  let contacts = [];
+
+  // Get entitlement ID from URL, and resolve to access_key
+  const entitlement_id = req.params.entitlement_id;
+  const phonebook_id = req.params.phonebook_id;
+  const entitlement = entitlements.find((entitlement) => {
+    return entitlement.id == entitlement_id;
+  })
+
+  if (!entitlement) {
+    return res.status(404).json({ error: "entitlement_not_found" });
+  }
+  const access_key = entitlement.access_key;
+
+  const response = await socket.timeout(5000).emitWithAck("get_phonebook", {
+    access_key: access_key,
+    phonebook_id: phonebook_id
+  }).catch(err => {
+    res.send(500).json({ error: "failed_to_get_phonebook", message: err });
+  })
+
+  if (!response) {
+    return res.status(500).json({ error: "failed_to_get_phonebook" });
+  }
+
+  // Interate the entries
+  for (let i = 0; i < response.entries.length; i++) {
+    let entry = response.entries[i];
+    let contact = {};
+
+    contact['entry_created_by'] = entry.created_by.name
+    contact['fields'] = [];
+
+    for (let field in entry.fields) {
+      let field_value = entry.fields[field];
+      contact['fields'].push({
+        "field": {
+          "id": field_value.field.id,
+          "name": field_value.field.name,
+        },
+        "value": field_value.value
+      })
+    }
+
+    contacts.push(contact);
+  }
+
+  res.status(200).json(contacts);
+})
+
+express_app.get("/entitlement/:entitlement_id/book/:phonebook_id/csv", async (req, res) => {
+  // Get a CSV copy of the phonebook from the server.
+  let csv = "name,mobile_number\n";
+  let fields = [];
+
+  // Get entitlement ID from URL, and resolve to access_key
+  const entitlement_id = req.params.entitlement_id;
+  const phonebook_id = req.params.phonebook_id;
+  const entitlement = entitlements.find((entitlement) => {
+    return entitlement.id == entitlement_id;
+  })
+
+  if (!entitlement) {
+    return res.status(404).json({ error: "entitlement_not_found" });
+  }
+  const access_key = entitlement.access_key;
+
+  const response = await socket.timeout(5000).emitWithAck("get_phonebook", {
+    access_key: access_key,
+    phonebook_id: phonebook_id
+  }).catch(err => {
+    res.send(500).json({ error: "failed_to_get_phonebook", message: err });
+  })
+
+  if (!response) {
+    return res.status(500).json({ error: "failed_to_get_phonebook" });
+  }
+
+  // Interate the entries
+  for (let i = 0; i < response.entries.length; i++) {
+    let entry = response.entries[i];
+    let contact = "";
+
+    for (let field in entry.fields) {
+      let field_value = entry.fields[field];
+      if (!fields.includes(field_value.field.name)) {
+        fields.push(field_value.field.name);
+      }
+      contact += field_value.value + ",";
+    }
+
+    csv += contact + "\n";
+  }
+
+  res.status(200).send(csv);
+});
+
 const main = async () => {
   logger.info("Fake Vendor Service v0.0.1")
   logger.info("(c) 2024 Cameron Fleming")
@@ -72,7 +182,7 @@ const main = async () => {
   }
 
   // Connect to Socket.io server using SOCKET_URL
-  const socket = new io(process.env.SOCKET_URL, {
+  socket = new io(process.env.SOCKET_URL, {
     auth: {
       setup_api_key: process.env.SOCKET_API_KEY,
       vendor_service_name: service_manifest.name
@@ -196,26 +306,26 @@ const test = async (socket) => {
   //   }
   // })
 
-  const response = await socket.timeout(5000).emitWithAck("get_available_phonebooks", {
-    "access_key": entitlements[0].access_key
-  });
+  // const response = await socket.timeout(5000).emitWithAck("get_available_phonebooks", {
+  //   "access_key": entitlements[0].access_key
+  // });
 
-  if (!response) {
-    return logger.error("failed to get phonebooks");
-  }
-  const phonebooks = response.phonebooks;
+  // if (!response) {
+  //   return logger.error("failed to get phonebooks");
+  // }
+  // const phonebooks = response.phonebooks;
 
-  // Get content of first phonebook
-  const response_entries = await socket.timeout(5000).emitWithAck("get_phonebook", {
-    "access_key": entitlements[0].access_key,
-    "phonebook_id": phonebooks[0].id
-  });
+  // // Get content of first phonebook
+  // const response_entries = await socket.timeout(5000).emitWithAck("get_phonebook", {
+  //   "access_key": entitlements[0].access_key,
+  //   "phonebook_id": phonebooks[0].id
+  // });
 
-  if (!response_entries) {
-    return logger.error("failed to get phonebook entries");
-  }
+  // if (!response_entries) {
+  //   return logger.error("failed to get phonebook entries");
+  // }
 
-  console.dir(response_entries.entries, { depth: null });
+  // console.dir(response_entries.entries, { depth: null });
 }
 
 main();

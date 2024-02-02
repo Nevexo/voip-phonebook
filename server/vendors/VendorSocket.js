@@ -25,7 +25,7 @@
 
 import { logger, vendor_service_socket } from "../index";
 
-import { get_entitlement_for_vendor, update_entitlement_status } from "./EntitlementManager";
+import { get_entitlement_for_vendor, update_entitlement_status, update_entitlement_metadata } from "./EntitlementManager";
 import { get_service_by_name, create_service, update_service } from "./VendorManager";
 
 import { CronJob } from 'cron';
@@ -150,7 +150,7 @@ const handle_provision_request = async (socket, data) => {
   }
 
   const entitlements = await get_entitlement_for_vendor(vendor_service.id);
-  const active_entitlements = entitlements.filter(entitlement => entitlement.status === "available");
+  const active_entitlements = entitlements.filter(entitlement => entitlement.entitlement_status === "available");
 
   await socket.emit("provision_entitlements", { entitlements: active_entitlements });
 
@@ -171,6 +171,88 @@ const handle_provision_accept = async (socket, data) => {
 
   logger.info(`handle_provision_accept: ${socket.id}: vendor service ${service.name} has accepted entitlements, transitioning to available.`)
   await update_service_status(socket, "available");
+}
+
+// Entitlement Setup Methods
+export const send_entitlement_to_vendor = async (entitlement) => {
+  // This method is called when a new entitlement is created. The vendor serivce
+  // must accept the entitlement, it'll be updated to active and then send to the service.
+  const service = connected_services.find(service => service.name === entitlement.vendor_service.name);
+  if (!service) {
+    logger.warn(`send_entitlement_to_vendor: vendor service ${entitlement.vendor_service.name} is not connected, this shouldn't be reachable.`)
+    return;
+  };
+
+  if (service.status !== "available") {
+    logger.warn(`send_entitlement_to_vendor: vendor service ${entitlement.vendor_service.name} is not available, this shouldn't be reachable.`)
+    return;
+  }
+
+  // Submit the entitlement to the Vendor Service. A response will be sent under
+  // entitlement_update, with an accept or deny.
+  await service.socket.emit("new_entitlement", { entitlement: entitlement });
+}
+
+// Entitlement Update Methods
+const handle_entitlement_update = async (socket, data) => {
+  // Handles an update message inregards to a previous sent entitlement.
+  // Entitlements are originally sent by send_entitlement_to_vendor.
+  // Following this, assume the vendor service has accepted and will deal with the entitlement.
+
+  const entitlement = data.entitlement_id;
+  switch (data.update_type) {
+    // -- Acceptance --
+    case "acceptance":
+      if (data.update.accepted) {
+        await update_entitlement_status(entitlement, "available");
+      } else {
+        await update_entitlement_status(entitlement, "invalid");
+      }
+
+      logger.info(`handle_entitlement_update: ${socket.id}: ${data.update.accepted ? "accepted" : "denied"} entitlement ${entitlement}.`)
+      break;
+
+    // -- Revokation --
+    case "revokation":
+      if (data.update.revoked) {
+        logger.info(`handle_entitlement_update: ${socket.id}: revoked entitlement ${entitlement}.`)
+      } else {
+        logger.warn(`handle_entitlement_update: ${socket.id}: vendor service sent invalid revokation update.`)
+      }
+      break;
+    
+    // -- Metadata update --
+    case "metadata":
+      logger.info(`handle_entitlement_update: ${socket.id}: vendor service sent metadata update for entitlement ${entitlement}.`)
+      await update_entitlement_metadata(entitlement, data.update.metadata);
+      break;
+      
+    default:
+      logger.warn(`handle_entitlement_update: ${socket.id}: vendor service sent invalid update: ${data.update_type}.`)
+      break;
+  }
+}
+
+// Entitlement revokation methods
+export const revoke_entitlement_from_vendor = async (entitlement) => {
+  // This method is called when an entitlement is revoked. The vendor service
+  // must be notified to remove the entitlement.
+  const service = connected_services.find(service => service.name === entitlement.vendor_service.name);
+  if (!service) {
+    logger.warn(`revoke_entitlement_from_vendor: vendor service ${entitlement.vendor_service.name} is not connected, this shouldn't be reachable.`)
+    return;
+  };
+
+  if (service.status !== "available") {
+    // It's not important if a revokation cannot be sent, as the entitlement simply won't exist
+    // when the vendor service next provisions.
+    logger.debug(`revoke_entitlement_from_vendor: vendor service ${entitlement.vendor_service.name} is not available.`)
+    return;
+  }
+
+  // Submit the entitlement to the Vendor Service. A response will be sent under
+  // entitlement_update, with an accept or deny.
+  await service.socket.emit("revoke_entitlement", { entitlement_id: entitlement.id });
 }
 
 // Socket setup
@@ -242,6 +324,10 @@ const socket_bind = async (socket) => {
   socket.on('provision_accept', async (data) => {
     await handle_provision_accept(socket, data);
   });
+
+  socket.on('entitlement_update', async (data) => {
+    await handle_entitlement_update(socket, data);
+  })
 }
 
 export const setup_socket_handlers = () => {

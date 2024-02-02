@@ -193,7 +193,10 @@ export const send_entitlement_to_vendor = async (entitlement) => {
 
   // Submit the entitlement to the Vendor Service. A response will be sent under
   // entitlement_update, with an accept or deny.
-  const response = await service.socket.timeout(5000).emitWithAck("new_entitlement", { entitlement: entitlement });
+  const response = await service.socket.timeout(5000).emitWithAck("new_entitlement", { entitlement: entitlement }).catch(err => {
+    return logger.error(`send_entitlement_to_vendor: ${service.socket.id}: no response to entitlement ${entitlement.id}: ${err}`)
+  })
+
   if (!response) {
     logger.error(`send_entitlement_to_vendor: ${service.socket.id}: no response to entitlement ${entitlement.id}: ${err}`)
     // Set to invalid
@@ -250,7 +253,9 @@ export const revoke_entitlement_from_vendor = async (entitlement) => {
 
   // Submit the entitlement to the Vendor Service. A response will be sent under
   // entitlement_update, with an accept or deny.
-  const response = await service.socket.timeout(5000).emitWithAck("revoke_entitlement", { entitlement_id: entitlement.id });
+  const response = await service.socket.timeout(5000).emitWithAck("revoke_entitlement", { entitlement_id: entitlement.id }).catch(err => {
+    return logger.error(`revoke_entitlement_from_vendor: ${service.socket.id}: no response to revokation ${entitlement.id}: ${err}`)
+  })
   if (!response) {
     return logger.error(`revoke_entitlement_from_vendor: ${service.socket.id}: no response to revokation ${entitlement.id}: ${err}`)
   }

@@ -29,7 +29,7 @@ export const vendorServiceEntitlementSchema = new Schema({
     type: String,
     required: true,
     default: "setup",
-    enum: ["invalid", "paused", "available"],
+    enum: ["setup", "invalid", "paused", "available"],
   },
   site: {
     type: Schema.Types.ObjectId,

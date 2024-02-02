@@ -59,7 +59,7 @@ export const create_phonebook_entry = async (phonebook_id, created_by, fields) =
     const field_object = await get_phonebook_field(field.field_id);
     if (!field_object) {
       logger.warn(`create_phonebook_entry: check fields: field ${field.field_id} does not exist!`);
-      return { error: "field_does_not_exist", field: field.field_id };
+      return { error: "field_does_not_exist", message: `invalid field: ${field.field_id}` };
     }
     fields_object.push(field);
   }
@@ -69,7 +69,7 @@ export const create_phonebook_entry = async (phonebook_id, created_by, fields) =
   for (const field of required_fields) {
     if (field.required && !fields_object.some(f => f.field_id === field.id)) {
       logger.warn(`create_phonebook_entry: check fields: required field ${field.id} (${field.name}) is missing!`);
-      return { error: "required_field_missing", field: field.id };
+      return { error: "required_field_missing", message: `missing field: ${field.id} (${field.name})` };
     }
   }
 

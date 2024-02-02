@@ -8,20 +8,23 @@ import { get_site } from "../site/SiteManage";
 import { get_service_by_id } from "./VendorManager";
 import { get_phonebook_fields_for_site } from "../fields/PhonebookFieldManager";
 import { VendorServiceEntitlement } from "../types/VendorServiceEntitlement";
+import { send_entitlement_to_vendor, revoke_entitlement_from_vendor } from "./VendorSocket";
+
+import { nanoid } from 'nanoid';
 
 export const get_entitlements = async () => {
-  return await VendorServiceEntitlement.find();
+  return await VendorServiceEntitlement.find().populate("vendor_service").populate("site");
 }
 
 export const get_entitlement_by_id = async (id) => {
-  return await VendorServiceEntitlement.findOne({ id: id });
+  return await VendorServiceEntitlement.findOne({ id: id }).populate("vendor_service").populate("site");
 }
 
 export const get_entitlement_for_vendor = async (vendor_service_id) => {
   const vendor_service = await get_service_by_id(vendor_service_id);
   if (!vendor_service) return undefined;
 
-  return await VendorServiceEntitlement.find({ vendor_service: vendor_service });
+  return await VendorServiceEntitlement.find({ vendor_service: vendor_service }).populate("vendor_service").populate("site");
 }
 
 export const get_entitlements_for_site = async (site_id) => {
@@ -35,6 +38,12 @@ export const create_entitlement = async (site_id, vendor_service_id, configurati
   // Check a service with this name doesn't already exist.
   const vendor_service = await get_service_by_id(vendor_service_id);
   if (!vendor_service) return { error: "service_does_not_exist" };
+
+  // Drop out of the service isn't connected, as provisioning must happen immediately.
+  if (vendor_service.status !== "available") return { 
+    error: "service_not_available",
+    message: "The chosen vendor service is not currently online. Entitlements can only be created for available services."
+  };
 
   const site = await get_site(site_id);
   if (!site) return { error: "site_does_not_exist" };
@@ -64,15 +73,24 @@ export const create_entitlement = async (site_id, vendor_service_id, configurati
     if (!vendor_service.supported_fields.some(f => f.name === field_mapping[field])) return { error: "invalid_field_mapping", message: `Field ${field_mapping[field]} is not valid for this vendor service.` };
   }
 
+  // Generate access key
+  const access_key = nanoid(64);
+
   const entitlement = new VendorServiceEntitlement({
     site: site,
     vendor_service: vendor_service,
     configuration: configuration,
     field_mapping: field_mapping,
+    access_key: access_key,
   });
 
   await entitlement.save();
   logger.info(`create_entitlement: created entitlement ${entitlement.id} for site ${site_id} and service ${vendor_service_id}`)
+
+  // Send the entitlement to the vendor service immediately.
+  // Re-resolve entitlement to ensure populated fields are available.
+  await send_entitlement_to_vendor(await get_entitlement_by_id(entitlement.id));
+
   return entitlement;
 }
 

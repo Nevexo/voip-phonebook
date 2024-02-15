@@ -130,7 +130,7 @@ const confirmUserDelete = (user_id) => {
               <dd v-if="user.id != auth.user.id" class="mt-1 text-sm text-gray-900 sm:col-span-2">
                 <button @click="confirmUserDelete(user.id)" class="flex items-center gap-1 bg-red-50 rounded-md px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10">Delete User</button>
               </dd>
-              <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">You cannot delete your own account.</dd>
+              <dd v-else class="mt-1 text-sm text-gray-900 sm:col-span-2">You cannot delete your own account.</dd>
             </div>
           </dl>
         </div>

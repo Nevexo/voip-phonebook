@@ -23,6 +23,11 @@ fetchUsers()
     <!-- Horizontal line -->
     <div class="border-b border-gray-200 mt-8"></div>
     
+    <!-- Right-aligned create user button -->
+    <div class="flex justify-end mt-8">
+      <RouterLink to="/users/create-user" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Create User</RouterLink>
+    </div>
+
     <!-- User list table -->
     <div class="mt-8">
       <table class="w-full">

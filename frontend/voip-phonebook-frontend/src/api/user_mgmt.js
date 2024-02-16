@@ -58,3 +58,18 @@ export const delete_user = async (id) => {
     return false;
   }
 }
+
+export const create_user = async (name, email, password) => {
+  // Create a user, requires root.
+  if (!auth.user.root_user) return null;
+  try {
+    const response = await api.post(`${API_URL}/user`, {
+      name: name,
+      email_address: email,
+      password: password
+    });
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}

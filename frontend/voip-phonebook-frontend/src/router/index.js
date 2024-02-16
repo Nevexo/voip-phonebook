@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import Login from '../views/Login.vue'
 import UserManagement from '../views/UserManagement.vue'
 import UserEdit from '../views/UserEdit.vue'
+import CreateUser from '../views/CreateUser.vue'
 import { auth } from '../main'
 
 const is_authenticated_guard = async (to, from) => {
@@ -35,6 +36,12 @@ const router = createRouter({
       path: '/users',
       name: 'users',
       component: UserManagement,
+      beforeEnter: [is_authenticated_guard, is_root_guard]
+    },
+    {
+      path: '/users/create-user',
+      name: 'create-user',
+      component: CreateUser,
       beforeEnter: [is_authenticated_guard, is_root_guard]
     },
     {

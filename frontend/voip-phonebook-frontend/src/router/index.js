@@ -4,6 +4,9 @@ import Login from '../views/Login.vue'
 import UserManagement from '../views/UserManagement.vue'
 import UserEdit from '../views/UserEdit.vue'
 import CreateUser from '../views/CreateUser.vue'
+import CreateSite from '../views/CreateSite.vue'
+import SiteEdit from '../views/Site.vue'
+import Sites from '../views/Sites.vue'
 import { auth } from '../main'
 
 const is_authenticated_guard = async (to, from) => {
@@ -50,6 +53,25 @@ const router = createRouter({
       params: true,
       component: UserEdit,
       beforeEnter: [is_authenticated_guard, is_root_guard]
+    },
+    {
+      path: '/sites',
+      name: 'sites',
+      component: Sites,
+      beforeEnter: is_authenticated_guard
+    },
+    {
+      path: '/sites/create-site',
+      name: 'create-site',
+      component: CreateSite,
+      beforeEnter: [is_authenticated_guard, is_root_guard]
+    },
+    {
+      path: '/site/:id',
+      name: 'site',
+      params: true,
+      component: SiteEdit,
+      beforeEnter: is_authenticated_guard
     }
   ]
 })

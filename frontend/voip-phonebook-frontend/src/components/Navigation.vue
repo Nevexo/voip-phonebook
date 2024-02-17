@@ -28,6 +28,11 @@ const doLogout = async () => {
       <div class="flex gap-3 flex-1 justify-end">
         <!-- Root user flag -->
         <span v-if="auth.user.root_user" class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">Root Access</span>
+        <!-- Sites Link -->
+        <RouterLink :to="{name: 'sites'}" class="flex items-center gap-1">
+          <i class="fa-solid fa-building"></i>
+          <span>Sites</span>
+        </RouterLink>
         <!-- User management link -->
         <RouterLink v-if="auth.user.root_user" :to="{name: 'users'}" class="flex items-center gap-1">
           <i class="fa-solid fa-users"></i>

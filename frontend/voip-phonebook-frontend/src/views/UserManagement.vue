@@ -18,8 +18,8 @@ fetchUsers()
 <template>
   <Navigation />
   <div class="container">
-    <h1 class="text-4xl font-bold mt-8">User Management</h1>
-    <p class="mt-4">Create and manager users within Triarom Contacts.</p>
+    <h1 class="text-3xl font-bold mt-8">User Management</h1>
+    <p class="text-gray-500">Manage users within Triarom Contacts</p>
     <!-- Horizontal line -->
     <div class="border-b border-gray-200 mt-8"></div>
     

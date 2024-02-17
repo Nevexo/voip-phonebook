@@ -16,7 +16,8 @@ import {
 } from "../site/SiteManage.js";
 
 import { 
-  get_user
+  get_user,
+  get_user_safe
 } from "../auth/Users.js";
 
 import { 
@@ -58,7 +59,7 @@ router.get("/", get_and_validate_session, async (req, res) => {
       id: site.id,
       name: site.name,
       authorised_users: site.authorised_users.map(u => u.id),
-      created_by: site.created_by.id,
+      created_by: await get_user_safe(site.created_by.id),
       created_at: site.created_at
     })
   }
@@ -77,7 +78,7 @@ router.get("/:site_id", get_and_validate_session, is_authorised_on_site, async (
     id: site.id,
     name: site.name,
     authorised_users: site.authorised_users.map(u => u.id),
-    created_by: site.created_by.id,
+    created_by: await get_user_safe(site.created_by.id),
     created_at: site.created_at
   });
 })

@@ -15,6 +15,7 @@ const confirmModalHeading = ref('')
 const confirmModalMessage = ref('')
 const confirmModalConfirmButtonText = ref('')
 const confirmModalConfirmButtonAction = ref(() => {})
+const error = ref({ error: '', title: '' });
 
 const router = useRouter()
 
@@ -64,7 +65,22 @@ const confirmUserDelete = (user_id) => {
   confirmModalConfirmButtonText.value = 'Delete'
   confirmModalConfirmButtonAction.value = async () => { 
     confirmModalState.value = false
-    await delete_user(user_id)
+    const result = await delete_user(user_id);
+    if (result.error) {
+      error.value.title = "Failed to Delete User";
+      switch(result.error) {
+        case "user_owns_sites":
+          error.value.error = "This user owns sites and cannot be deleted, please those sites first.";
+          break;
+        case "user_authorised_on_sites":
+          error.value.error = "This user is authorised to access sites and cannot be deleted, please remove those authorisations first.";
+          break;
+        default:
+          error.value.error = result.error
+          break;
+      }
+      return;
+    }
     router.push({ name: 'users' })
    }
 }
@@ -96,6 +112,23 @@ const confirmUserDelete = (user_id) => {
     </p>
     <div class="border-b border-gray-200 mt-8"></div>
 
+
+    <!-- Error message in red box -->
+    <div v-if="error.error" class="bg-red-100 border-t-4 border-red-500 rounded-b text-red-900 px-4 py-3 shadow-md mt-8" role="alert">
+      <div class="flex">
+        <div class="py-1">
+          <svg class="fill-current h-6 w-6 text-red-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M10 3.58l-6.58 6.42a1.5 1.5 0 0 0 2.08 2.16L10 8.16l4.5 4.5a1.5 1.5 0 0 0 2.08-2.16L10 3.58z" />
+          </svg>
+        </div>
+        <div>
+          <p class="font-bold">{{ error.title }}</p>
+          <p class="text-sm">
+            {{ error.error }}
+          </p>
+        </div>
+      </div>
+    </div>
     <!-- Card based user information -->
     <!-- Card for creation date/last login date -->
     <!-- Card for user description -->

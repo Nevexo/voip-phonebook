@@ -55,7 +55,7 @@ export const delete_user = async (id) => {
     const response = await api.delete(`${API_URL}/user/${id}`);
     return response.data;
   } catch (error) {
-    return false;
+    return error.response.data;
   }
 }
 

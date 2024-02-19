@@ -143,7 +143,7 @@ router.delete("/:id", get_and_validate_session, is_root, async (req, res) => {
   }
 
   // Check user doesn't own any sites
-  const sites = await Site.find({ created_by: user })
+  const sites = await Site.find({ created_by: {'id': user.id} })
   if (sites.length > 0) {
     return res.status(400).json({ error: "user_owns_sites" })
   }

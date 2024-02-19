@@ -13,6 +13,7 @@ import {
   change_user_root_status,
   get_all_users
 } from "../auth/Users.js";
+import { Site } from "../types/Site.js";
 import {
   prune_user_sessions
 } from "../auth/Sessions.js";

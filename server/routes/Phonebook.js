@@ -68,6 +68,10 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "invalid_name_length", message: "Name must be between 1 and 64 characters." });
   }
 
+  if (!req.params.site_id) {
+    return res.status(400).json({error: 'missing_site_id'})
+  }
+
   // Check if phonebook already exists with this name, on this site.
   const phonebooks = await get_phonebooks_by_site(req.params.site_id);
   if (phonebooks.some(p => p.name === req.body.name)) {

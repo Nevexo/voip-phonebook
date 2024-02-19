@@ -127,7 +127,8 @@ router.patch("/:id/password", get_and_validate_session, async (req, res) => {
   }
 
   // Change the user's password.
-  await change_user_password(req.params.id, req.body.password)
+  const result = await change_user_password(req.params.id, req.body.password)
+  if (result.error) return res.status(400).json({error: result.error})
 
   return res.status(200).json({ success: true })
 })
@@ -142,7 +143,8 @@ router.delete("/:id", get_and_validate_session, is_root, async (req, res) => {
   // Invalidate all sessions
   await prune_user_sessions(req.params.id)
 
-  await delete_user(req.params.id)
+  const result = await delete_user(req.params.id);
+  if (result.error) return res.status(400).json({error: result.error})
 
   return res.status(200).json({ success: true })
 })

@@ -154,7 +154,13 @@ const confirm_delete_site = () => {
         </div>
       </div>
       <div class="border-t border-gray-200">
-        <table class="min-w-full">
+        <!-- Blue info box if no sites exist -->
+        <div v-if="phonebooks.length == 0" class="bg-amber-50 px-4 py-5 sm:px-6">
+            <p class="text-sm text-amber-700">
+              <strong>No phonebooks have been created on this site.</strong> Create a new one with the <i>New Phonebook</i> button above.
+            </p>
+          </div>
+        <table v-else class="min-w-full">
           <thead>
             <tr>
               <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
@@ -268,7 +274,8 @@ const confirm_delete_site = () => {
             <div v-if="auth.user.root_user" class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Delete Site</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
-                <button @click.prevent="confirm_delete_site" class="flex items-center gap-1 bg-red-50 rounded-md px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10">Delete Site</button>
+                <button v-if="phonebooks.length == 0" @click.prevent="confirm_delete_site" class="flex items-center gap-1 bg-red-50 rounded-md px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10">Delete Site</button>
+                <dd v-else class="mt-1 text-sm text-gray-900 sm:col-span-2">You must delete all phonebooks before you can remove this site.</dd>
               </dd>
             </div>
           </dl>

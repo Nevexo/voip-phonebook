@@ -4,6 +4,7 @@
 // NOTE: This makes use of the Bun library, making it incompatible with Node.
 
 import { User } from "../types/User";
+import { Site } from "../types/Site";
 import { logger } from "../index";
 
 export const get_user = async (id) => {
@@ -72,6 +73,13 @@ export const delete_user = async (id) => {
   if (!user) {
     logger.warn(`delete_user: user ${id} does not exist!`)
     return { error: "user_does_not_exist" }
+  }
+
+  // Ensure user doesn't own any sites
+  const sites = await Site.find({ authorised_users: id })
+  if (sites.length > 0) {
+    logger.warn(`delete_user: user ${id} owns sites!`)
+    return { error: "user_owns_sites" }
   }
 
   // Delete mongoose entry

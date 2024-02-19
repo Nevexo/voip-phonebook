@@ -80,7 +80,8 @@ const do_site_create = async (name, authorised_users) => {
           <div class="flex flex-col sm:flex-row gap-4">
             <div class="flex flex-col w-full">
               <label for="site_name" class="text-sm font-bold text-gray-700">Authorised Users</label>
-              <p class="text-gray-500 text-sm">Users who are authorised to manage this site, you must add one to create the site.</p>
+              <p class="text-gray-500 text-sm">Users who are authorised to manage this site, you must add at least one user to create the site.</p>
+              <p class="text-gray-500 text-sm"><strong>Root User Notice: </strong>You don't need to add yourself to this list, only add the customer's account(s) - as a root user you'll already gain access.</p>
               <div class="flex gap-2 py-5">
                 <!-- Current authorised users with a delete button next to each one -->
                 <div v-for="user in authorised_users" class="bg-gray-100 rounded-md p-2 flex items-center gap-2">

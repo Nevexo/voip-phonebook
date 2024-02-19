@@ -8,4 +8,5 @@
 <script setup>
 import { RouterView } from 'vue-router'
 import BetaNotice from '@/components/BetaNotice.vue'
+import Footer from '@/views/Footer.vue'
 </script>

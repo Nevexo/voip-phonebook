@@ -140,6 +140,27 @@ router.delete("/:id", get_and_validate_session, is_root, async (req, res) => {
     return res.status(404).json({ error: "user_does_not_exist" })
   }
 
+  // Check user doesn't own any sites
+  const sites = await Site.find({ created_by: user })
+  if (sites.length > 0) {
+    return res.status(400).json({ error: "user_owns_sites" })
+  }
+
+  // Check user isn't authorised on any sites
+  const authorised_sites = await Site.find({ authorised_users: user.id })
+  // De-authorise the user TODO: Document this
+  if (process.env.AUTO_DEAUTHORISE_USER_ON_DELETE == "true") {
+    for (let site of authorised_sites) {
+      site.authorised_users = site.authorised_users.filter(u => u != user)
+      await site.save()
+    }
+  } else {
+    if (authorised_sites.length > 0) {
+      return res.status(400).json({ error: "user_authorised_on_sites" })
+    }
+  }
+  
+
   // Invalidate all sessions
   await prune_user_sessions(req.params.id)
 

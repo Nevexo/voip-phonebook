@@ -37,3 +37,33 @@ export const create_site = async (name, authorised_users) => {
     return error.response.data;
   }
 }
+
+export const remove_authorised_user = async (site_id, user_id) => {
+  // Remove a user from a site, requires root user.
+  try {
+    const response = await api.delete(`${API_URL}/site/${site_id}/authorise/${user_id}`);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}
+
+export const add_authorised_user = async (site_id, user_id) => {
+  // Add a user to a site, requires root user.
+  try {
+    const response = await api.post(`${API_URL}/site/${site_id}/authorise/${user_id}`);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}
+
+export const delete_site = async (site_id) => {
+  // Delete a site, requires root user.
+  try {
+    const response = await api.delete(`${API_URL}/site/${site_id}`);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}

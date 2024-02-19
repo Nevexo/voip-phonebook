@@ -77,3 +77,13 @@ export const get_phonebooks = async (site_id) => {
     return null;
   }
 }
+
+export const get_fields = async (site_id) => {
+  // Get all fields for a site, requires authentication.
+  try {
+    const response = await api.get(`${API_URL}/site/${site_id}/field`);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}

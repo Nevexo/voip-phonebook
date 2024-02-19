@@ -2,7 +2,7 @@
 import Navigation from '@/components/Navigation.vue';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { get_site, remove_authorised_user, add_authorised_user, delete_site, get_phonebooks } from '@/api/site_mgmt';
+import { get_site, remove_authorised_user, add_authorised_user, delete_site, get_phonebooks, get_fields } from '@/api/site_mgmt';
 import { get_user, get_users } from '@/api/user_mgmt';
 import { auth } from '../main';
 
@@ -15,6 +15,7 @@ const error = ref({});
 const authorised_users = ref([]);
 const non_authorised_users = ref([]);
 const phonebooks = ref([]);
+const fields = ref([]);
 let selected_user = '';
 let users = [];
 
@@ -35,6 +36,9 @@ onMounted(async () => {
 
   // Get phonebooks
   phonebooks.value = await get_phonebooks(site.value.id);
+
+  // Get fields
+  fields.value = await get_fields(site.value.id);
 
   if (auth.user.root_user) {
     // Populate authorised users
@@ -187,6 +191,41 @@ const confirm_delete_site = () => {
 
     <!-- Half-width control cards -->
     <div class="grid grid-cols-1 gap-4 mt-8 sm:grid-cols-2">
+      <!-- Site Fields Card -->
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">Site Phonebook Fields</h3>
+          <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage the Fields within your Phonebooks.</p>
+        </div>
+        <div class="border-t border-gray-200">
+          <table class="min-w-full">
+            <thead>
+              <tr>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="field in fields" :key="field.id">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ field.name }}
+                    <span v-if="field.created_by_system" class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">System</span>
+                    <span v-if="field.required" class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">Required</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ field.type }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <!-- <router-link :to="{ name: 'phonebook', params: { site_id: site.id, phonebook_id: phonebook.id } }" class="text-indigo-600 hover:text-indigo-900">View/Edit</router-link> -->
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Site information card -->
       <div class="bg-white shadow overflow-hidden sm:rounded-lg">
         <div class="px-4 py-5 sm:px-6">

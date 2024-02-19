@@ -6,6 +6,7 @@ import { Router } from "express";
 import { 
   create_user, 
   get_user_safe, 
+  get_user,
   delete_user, 
   change_user_password, 
   change_user_name, 
@@ -137,13 +138,13 @@ router.patch("/:id/password", get_and_validate_session, async (req, res) => {
 
 router.delete("/:id", get_and_validate_session, is_root, async (req, res) => {
   // Delete a user by ID
-  const user = await get_user_safe(req.params.id)
+  const user = await get_user(req.params.id)
   if (!user) {
     return res.status(404).json({ error: "user_does_not_exist" })
   }
 
   // Check user doesn't own any sites
-  const sites = await Site.find({ created_by: {'id': user.id} })
+  const sites = await Site.find({ created_by: user })
   if (sites.length > 0) {
     return res.status(400).json({ error: "user_owns_sites" })
   }

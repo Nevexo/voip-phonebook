@@ -24,13 +24,13 @@ onMounted(async () => {
     <h1 class="text-3xl font-bold mt-8">Sites</h1>
     <p class="text-gray-500">Manage your sites</p>
 
+    <!-- Horizontal line -->
+    <div class="border-b border-gray-200 mt-8"></div>
+
     <!-- Right-aligned create site button -->
     <div v-if="auth.user.root_user" class="flex justify-end mt-8">
       <RouterLink to="/sites/create-site" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Create Site</RouterLink>
     </div> 
-
-    <!-- Horizontal line -->
-    <div class="border-b border-gray-200 mt-8"></div>
 
     <!-- Cards for each site -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">

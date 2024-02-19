@@ -146,7 +146,7 @@ export const remove_user_from_site = async (site_id, user_id) => {
     return { error: "user_not_authorised" };
   }
 
-  site.authorised_users.splice(site.authorised_users.indexOf(user), 1);
+  site.authorised_users.splice(userIndex, 1);
   await site.save();
 
   logger.info(`remove_user_from_site: user ${user_id} removed from site ${site_id}`)

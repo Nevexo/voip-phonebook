@@ -76,7 +76,7 @@ export const delete_user = async (id) => {
   }
 
   // Ensure user doesn't own any sites
-  const sites = await Site.find({ authorised_users: id })
+  const sites = await Site.find({ created_by: user })
   if (sites.length > 0) {
     logger.warn(`delete_user: user ${id} owns sites!`)
     return { error: "user_owns_sites" }

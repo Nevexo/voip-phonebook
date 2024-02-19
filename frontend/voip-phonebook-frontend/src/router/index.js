@@ -7,6 +7,8 @@ import CreateUser from '../views/CreateUser.vue'
 import CreateSite from '../views/CreateSite.vue'
 import SiteEdit from '../views/Site.vue'
 import Sites from '../views/Sites.vue'
+import Phonebook from '../views/Phonebook.vue'
+import CreatePhonebook from '../views/CreatePhonebook.vue'
 import { auth } from '../main'
 
 const is_authenticated_guard = async (to, from) => {
@@ -71,6 +73,20 @@ const router = createRouter({
       name: 'site',
       params: true,
       component: SiteEdit,
+      beforeEnter: is_authenticated_guard
+    },
+    {
+      path: '/site/:site_id/phonebook/:phonebook_id',
+      name: 'phonebook',
+      params: true,
+      component: Phonebook,
+      beforeEnter: is_authenticated_guard
+    },
+    {
+      path: '/site/:site_id/new-phonebook',
+      name: 'new-phonebook',
+      params: true,
+      component: CreatePhonebook,
       beforeEnter: is_authenticated_guard
     }
   ]

@@ -2,7 +2,7 @@
 import Navigation from '@/components/Navigation.vue';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { get_site, remove_authorised_user, add_authorised_user, delete_site } from '@/api/site_mgmt';
+import { get_site, remove_authorised_user, add_authorised_user, delete_site, get_phonebooks } from '@/api/site_mgmt';
 import { get_user, get_users } from '@/api/user_mgmt';
 import { auth } from '../main';
 
@@ -13,6 +13,8 @@ const router = useRouter();
 const site = ref({'created_by': {}});
 const authorised_users = ref([]);
 const non_authorised_users = ref([]);
+const phonebooks = ref([]);
+let selected_user = '';
 let users = [];
 
 const confirmModalState = ref(false)
@@ -28,8 +30,10 @@ onMounted(async () => {
     router.push({ name: 'sites' });
     return;
   }
-
   site.value = result;
+
+  // Get phonebooks
+  phonebooks.value = await get_phonebooks(site.value.id);
 
   if (auth.user.root_user) {
     // Populate authorised users
@@ -111,7 +115,43 @@ const confirm_delete_site = () => {
     <h1 class="text-4xl font-bold mt-8">{{ site.name }}</h1>
     <div class="border-b border-gray-200 mt-8"></div>
 
+    <!-- Full width card for phonebook table -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mt-8">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg font-medium leading-6 text-gray-900">Phonebooks</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">Phonebooks for this site.</p>
+        <!-- New button right aligned -->
+        <div class="flex justify-end mt-4">
+          <router-link :to="{ path: `/site/${site.id}/new-phonebook` }" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">New Phonebook</router-link>
+        </div>
+      </div>
+      <div class="border-t border-gray-200">
+        <table class="min-w-full">
+          <thead>
+            <tr>
+              <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+              <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="phonebook in phonebooks" :key="phonebook.id">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ phonebook.name }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ new Date(phonebook.created_at).toLocaleString() }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <router-link :to="{ name: 'phonebook', params: { site_id: site.id, phonebook_id: phonebook.id } }" class="text-indigo-600 hover:text-indigo-900">View/Edit</router-link>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
+    <!-- Half-width control cards -->
     <div class="grid grid-cols-1 gap-4 mt-8 sm:grid-cols-2">
       <!-- Site information card -->
       <div class="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -132,6 +172,10 @@ const confirm_delete_site = () => {
             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Site Owner</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ site.created_by.name }} ({{ site.created_by.email_address }})</dd>
+            </div>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">Internal Site ID</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ site.id }}</dd>
             </div>
           </dl>
         </div>

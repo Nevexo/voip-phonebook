@@ -67,3 +67,13 @@ export const delete_site = async (site_id) => {
     return error.response.data;
   }
 }
+
+export const get_phonebooks = async (site_id) => {
+  // Get all phonebooks for a site, requires authentication.
+  try {
+    const response = await api.get(`${API_URL}/site/${site_id}/phonebook`);
+    return response.data;
+  } catch (error) {
+    return null;
+  }
+}

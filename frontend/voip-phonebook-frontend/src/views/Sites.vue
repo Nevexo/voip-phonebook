@@ -32,6 +32,27 @@ onMounted(async () => {
       <RouterLink to="/sites/create-site" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Create Site</RouterLink>
     </div> 
 
+    <!-- Notice when no sites available -->
+    <div v-if="sites.length == 0" class="bg-blue-100 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
+      <div class="flex">
+        <div class="py-1">
+          <svg class="fill-current h-6 w-6 text-blue-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M2.5 3.5l15 15" />
+          </svg>
+        </div>
+        <div>
+          <p class="font-bold">No Sites Available</p>
+          <p class="text-sm">
+            Your account has not been authorised to access any sites, please contact your system administrator.
+          </p>
+          <br/>
+          <p v-if="auth.user.root_user" class="text-sm">
+            <strong>Root User Notice: </strong> As a root user, you can create new sites using the <i>Create Site</i> button at the top of this page.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Cards for each site -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
       <div v-for="site in sites" :key="site.id" class="bg-white rounded-lg shadow-md p-4">

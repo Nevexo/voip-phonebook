@@ -11,6 +11,7 @@ import ConfirmModal from '@/components/ConfirmModal.vue'
 const route = useRoute();
 const router = useRouter();
 const site = ref({'created_by': {}});
+const error = ref({});
 const authorised_users = ref([]);
 const non_authorised_users = ref([]);
 const phonebooks = ref([]);
@@ -66,10 +67,11 @@ const confirm_remove_authorised = (user_id) => {
   }
 }
 
-const authorise_user = (user_id) => {
-  const result = add_authorised_user(site.value.id, user_id);
+const authorise_user = async (user_id) => {
+  const result = await add_authorised_user(site.value.id, user_id);
   if (result.error != undefined) {
-    // Handle the error with a message
+    error.value.title = "Failed to Authorise User"
+    error.value.error = result.error;
     return;
   }
 
@@ -82,10 +84,19 @@ const confirm_delete_site = () => {
   confirmModalHeading.value = 'Delete Site';
   confirmModalMessage.value = 'Are you sure you want to delete this site?';
   confirmModalConfirmButtonText.value = 'Delete';
-  confirmModalConfirmButtonAction.value = () => {
-    const result = delete_site(site.value.id);
+  confirmModalConfirmButtonAction.value = async () => {
+    const result = await delete_site(site.value.id);
+    confirmModalState.value = false;
     if (result.error != undefined) {
-      // Handle the error with a message
+      error.value.title = "Failed to Delete Site"
+      switch (result.error) {
+        case "site_has_phonebooks":
+          error.value.error = "This site has phonebooks, which must be deleted first."
+          break;
+        default:
+          error.value.error = result.error;
+          break;
+      }
       return;
     }
 
@@ -114,6 +125,23 @@ const confirm_delete_site = () => {
     </div>
     <h1 class="text-4xl font-bold mt-8">{{ site.name }}</h1>
     <div class="border-b border-gray-200 mt-8"></div>
+
+    <!-- Error message in red box -->
+    <div v-if="error.error" class="bg-red-100 border-t-4 border-red-500 rounded-b text-red-900 px-4 py-3 shadow-md mt-8" role="alert">
+      <div class="flex">
+        <div class="py-1">
+          <svg class="fill-current h-6 w-6 text-red-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M10 3.58l-6.58 6.42a1.5 1.5 0 0 0 2.08 2.16L10 8.16l4.5 4.5a1.5 1.5 0 0 0 2.08-2.16L10 3.58z" />
+          </svg>
+        </div>
+        <div>
+          <p class="font-bold">{{ error.title }}</p>
+          <p class="text-sm">
+            {{ error.error }}
+          </p>
+        </div>
+      </div>
+    </div>
 
     <!-- Full width card for phonebook table -->
     <div class="bg-white shadow overflow-hidden sm:rounded-lg mt-8">

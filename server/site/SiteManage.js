@@ -85,6 +85,8 @@ export const delete_site = async (id) => {
   const site = await get_site(id);
   if (!site) return undefined;
 
+  logger.debug(`delete_site: deleting site ${id} (${site.name})`);
+
   // Check for any phonebooks
   const phonebooks = await get_phonebooks_by_site(id);
   if (phonebooks.length > 0) {
@@ -101,9 +103,11 @@ export const delete_site = async (id) => {
 
   // Delete all system fields with force delete.
   for (const field of fields) {
+    logger.debug(`delete_site: deleting phonebook field ${field.id} (${field.name}) as part of site deletion`);
     await delete_phonebook_field(field.id, true);
   }
 
+  logger.info(`delete_site: site ${id} (${site.name}) deleted`);
   await Site.deleteOne({ id: id });
   return site;
 }

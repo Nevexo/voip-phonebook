@@ -15,7 +15,7 @@ import {
   get_all_users
 } from "../auth/Users.js";
 import { Site } from "../types/Site.js";
-import { user_is_authorised_on_site } from "../site/SiteManage.js";
+import { user_is_authorised_on_site, remove_user_from_site } from "../site/SiteManage.js";
 import {
   prune_user_sessions
 } from "../auth/Sessions.js";
@@ -143,20 +143,15 @@ router.delete("/:id", get_and_validate_session, is_root, async (req, res) => {
     return res.status(404).json({ error: "user_does_not_exist" })
   }
 
-  // Check user doesn't own any sites
-  const sites = await Site.find({ created_by: user })
-  if (sites.length > 0) {
-    return res.status(400).json({ error: "user_owns_sites" })
-  }
-
   // Check user isn't authorised on any sites, get all sites and use is_authorised_on_site
   const sites_full = await Site.find()
   const authorised_sites = sites_full.filter(async (s) => await user_is_authorised_on_site(s.id, user.id))
   // De-authorise the user TODO: Document this
   if (process.env.AUTO_DEAUTHORISE_USER_ON_DELETE == "true") {
-    for (let site of authorised_sites) {
-      site.authorised_users = site.authorised_users.filter(u => u != user)
-      await site.save()
+    logger.debug("user_mgmt: delete_user: AUTO_DEAUTHORISE_USER_ON_DELETE is true, deauthorising user from all sites")
+    for await (let site of authorised_sites) {
+      logger.debug("user_mgmt: delete_user: deauthorising user from site " + site.id + " (" + site.name + ")")
+      await remove_user_from_site(site.id, user.id)
     }
   } else {
     if (authorised_sites.length > 0) {

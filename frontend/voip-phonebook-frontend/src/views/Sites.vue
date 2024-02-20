@@ -58,6 +58,7 @@ onMounted(async () => {
       <div v-for="site in sites" :key="site.id" class="bg-white rounded-lg shadow-md p-4">
         <h2 class="text-xl font-bold">{{ site.name }}</h2>
         <p class="text-gray-500">Created By:  {{ site.created_by.name }}</p>
+        <span v-if="site.authorised_users.length == 0" class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20"><i class="fa-solid fa-triangle-exclamation"></i> No Authorised Users</span>
         <div class="mt-4">
           <RouterLink :to="{name: 'site', params: {id: site.id}}" class="text-indigo-600 hover:text-indigo-900">Edit</RouterLink>
         </div>

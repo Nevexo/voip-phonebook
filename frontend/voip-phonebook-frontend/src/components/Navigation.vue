@@ -38,6 +38,11 @@ const doLogout = async () => {
           <i class="fa-solid fa-users"></i>
           <span>Users</span>
         </RouterLink>
+        <!-- Change password link -->
+        <RouterLink :to="{name: 'update-password'}" class="flex items-center gap-1">
+          <i class="fa-solid fa-key"></i>
+          <span>Change Password</span>
+        </RouterLink>
         <!-- Logout link -->
         <button @click="doLogout" class="flex items-center gap-1">
           <i class="fa-solid fa-sign-out-alt"></i>

@@ -9,6 +9,7 @@ import SiteEdit from '../views/Site.vue'
 import Sites from '../views/Sites.vue'
 import Phonebook from '../views/Phonebook.vue'
 import CreatePhonebook from '../views/CreatePhonebook.vue'
+import UpdatePassword from '../views/UpdatePassword.vue'
 import { auth } from '../main'
 
 const is_authenticated_guard = async (to, from) => {
@@ -36,6 +37,12 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/update-password',
+      name: 'update-password',
+      component: UpdatePassword,
+      beforeEnter: is_authenticated_guard,
     },
     {
       path: '/users',

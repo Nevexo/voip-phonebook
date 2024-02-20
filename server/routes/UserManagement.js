@@ -133,6 +133,9 @@ router.patch("/:id/password", get_and_validate_session, async (req, res) => {
   const result = await change_user_password(req.params.id, req.body.password)
   if (result.error) return res.status(400).json({error: result.error})
 
+  // Invalidate all sessions
+  await prune_user_sessions(req.params.id)
+
   return res.status(200).json({ success: true })
 })
 

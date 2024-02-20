@@ -2,7 +2,7 @@
 import Navigation from '@/components/Navigation.vue'
 import { ref } from 'vue'
 import { auth } from '../main'
-import { get_user, update_root_status, delete_user } from '../api/user_mgmt';
+import { get_user, update_root_status, delete_user, change_password } from '../api/user_mgmt';
 import { useRouter, useRoute } from 'vue-router'
 import { onMounted } from 'vue';
 
@@ -16,6 +16,7 @@ const confirmModalMessage = ref('')
 const confirmModalConfirmButtonText = ref('')
 const confirmModalConfirmButtonAction = ref(() => {})
 const error = ref({ error: '', title: '' });
+const success = ref({ message: '', title: '' });
 
 const router = useRouter()
 
@@ -85,6 +86,29 @@ const confirmUserDelete = (user_id) => {
    }
 }
 
+const doPasswordChange = async (password, password_confirm) => {
+  if (password != password_confirm) {
+    error.value.title = "Password Mismatch";
+    error.value.error = "The passwords do not match.";
+    window.scrollTo(0, 0)
+    return;
+  }
+
+  const result = await change_password(user.value.id, password);
+  if (result.error) {
+    error.value.title = "Failed to Change Password";
+    error.value.error = result.error;
+    window.scrollTo(0, 0)
+    return;
+  }
+  success.value.title = "Password Changed";
+  success.value.message = "The user's password has been updated.";
+  window.scrollTo(0, 0)
+
+  // Clear the password fields
+  error.value.title = ''
+  error.value.error = ''
+}
 </script>
 
 <template>
@@ -125,6 +149,23 @@ const confirmUserDelete = (user_id) => {
           <p class="font-bold">{{ error.title }}</p>
           <p class="text-sm">
             {{ error.error }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Green success box -->
+    <div v-if="success.message" class="bg-green-100 border-t-4 border-green-500 rounded-b text-green-900 px-4 py-3 shadow-md mt-8" role="alert">
+      <div class="flex">
+        <div class="py-1">
+          <svg class="fill-current h-6 w-6 text-green-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M10 3.58l-6.58 6.42a1.5 1.5 0 0 0 2.08 2.16L10 8.16l4.5 4.5a1.5 1.5 0 0 0 2.08-2.16L10 3.58z" />
+          </svg>
+        </div>
+        <div>
+          <p class="font-bold">{{ success.title }}</p>
+          <p class="text-sm">
+            {{ success.message }}
           </p>
         </div>
       </div>
@@ -216,15 +257,20 @@ const confirmUserDelete = (user_id) => {
           </div>
 
           <div class="bg-white px-4 py-5 sm:px-6">
-            <form>
+            <!-- Call method and then clear the form -->
+            <form @submit.prevent="doPasswordChange(password, password_confirm)">
               <div class="grid grid-cols-1 gap-6">
                 <div>
                   <label for="password" class="block text-sm font-medium text-gray-700">New Password</label>
-                  <input type="password" name="password" id="password" autocomplete="new-password" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-phonebook-primary sm:text-sm sm:leading-6">
+                  <input type="password" name="password" v-model="password" autocomplete="new-password" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-phonebook-primary sm:text-sm sm:leading-6">
                 </div>
                 <div>
                   <label for="password_confirm" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                  <input type="password" name="password_confirm" id="password_confirm" autocomplete="new-password" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-phonebook-primary sm:text-sm sm:leading-6">
+                  <input type="password" name="password_confirm" v-model="password_confirm" autocomplete="new-password" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-phonebook-primary sm:text-sm sm:leading-6">
+                </div>
+                <!-- Small text stating user sessions will invalidate -->
+                <div class="text-sm text-gray-500">
+                  Changing the user's password will invalidate all active sessions.
                 </div>
                 <div>
                   <button type="submit" class="flex w-full justify-center rounded-md bg-phonebook-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-phonebook-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-phonebook-primary">Change Password</button>

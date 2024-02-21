@@ -27,11 +27,13 @@ export const create_phonebook_field = async (site_id, name, type, required, syst
   // Create a new phonebook field
   // site_id must be resolved.
 
+  if (name.length < 1) return { error: "no_name_provided" }
+
   // Verify site exists
   const site = await get_site(site_id);
   if (!site) {
     logger.warn(`create_phonebook_field: check site: site ${site_id} does not exist!`);
-    return { error: "site_does_not_exist", site: site_id };
+    return { error: "site_does_not_exist" };
   }
 
   // Check the type is valid

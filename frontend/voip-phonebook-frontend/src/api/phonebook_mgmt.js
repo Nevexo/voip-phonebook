@@ -15,3 +15,33 @@ export const create_phonebook = async (site_id, name) => {
     return error.response.data;
   }
 }
+
+export const get_phonebook = async (site_id, phonebook_id) => {
+  // Get phonebook by id, requires authentication.
+  try {
+    const response = await api.get(`${API_URL}/site/${site_id}/phonebook/${phonebook_id}`);
+    return response.data;
+  } catch (error) {
+    return response.data;
+  }
+}
+
+export const delete_phonebook = async (site_id, phonebook_id) => {
+  // Delete a phonebook.
+  try {
+    const response = await api.delete(`${API_URL}/site/${site_id}/phonebook/${phonebook_id}`);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}
+
+export const get_entries = async (site_id, phonebook_id) => {
+  // Get all entries for a phonebook, requires authentication.
+  try {
+    const response = await api.get(`${API_URL}/site/${site_id}/phonebook/${phonebook_id}/entry`);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}

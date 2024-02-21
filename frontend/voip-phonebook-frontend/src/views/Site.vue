@@ -2,7 +2,7 @@
 import Navigation from '@/components/Navigation.vue';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { get_site, remove_authorised_user, add_authorised_user, delete_site, get_phonebooks, get_fields } from '@/api/site_mgmt';
+import { get_site, remove_authorised_user, add_authorised_user, delete_site, get_phonebooks, get_fields, valid_types, create_field, delete_field } from '@/api/site_mgmt';
 import { get_user, get_users } from '@/api/user_mgmt';
 import { auth } from '../main';
 
@@ -24,6 +24,7 @@ const confirmModalHeading = ref('')
 const confirmModalMessage = ref('')
 const confirmModalConfirmButtonText = ref('')
 const confirmModalConfirmButtonAction = ref(() => {})
+const hideCreateFieldForm = ref(true)
 
 onMounted(async () => {
   const result = await get_site(route.params.id);
@@ -108,14 +109,39 @@ const confirm_delete_site = () => {
     router.push({ name: 'sites' });
   }
 }
+
+const do_create_field = async (name = "", type = "text", required = false) => {
+  const result = await create_field(site.value.id, name, type, required);
+  if (result.error != undefined) {
+    error.value.title = "Failed to Create Field"
+    error.value.error = result.error;
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  fields.value.push(result);
+  hideCreateFieldForm.value = true;
+}
+
+const do_delete_field = async (field_id) => {
+  const result = await delete_field(site.value.id, field_id);
+  if (result.error != undefined) {
+    error.value.title = "Failed to Delete Field"
+    error.value.error = result.error;
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  fields.value = fields.value.filter(field => field.id != field_id);
+}
 </script>
 
 <template>
   <Navigation/>
   <ConfirmModal
-    :show_state="confirmModalState" 
-    :heading="confirmModalHeading" 
-    :message="confirmModalMessage" 
+    :show_state="confirmModalState"
+    :heading="confirmModalHeading"
+    :message="confirmModalMessage"
     :confirm_button_text="confirmModalConfirmButtonText"
     :confirm_button_action="confirmModalConfirmButtonAction"
   />
@@ -198,6 +224,28 @@ const confirm_delete_site = () => {
           <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage the Fields within your Phonebooks.</p>
         </div>
         <div class="border-t border-gray-200">
+          <!-- Form to create new field, take name type dropdown and required checkbox -->
+          <div class="bg-gray-50 px-4 py-5 gap-3" :hidden="hideCreateFieldForm">
+            <dd class="mt-1 text-sm text-gray-900 px-3 space-x-3">
+              <input v-model="new_field_name" class="border border-gray-200 rounded-md p-2 focus:outline-none" placeholder="Field Name">
+              <select v-model="new_field_type" default="text" class="border border-gray-200 rounded-md p-2 focus:outline-none px-10 focus:ring-2 focus:ring-indigo-600 focus:border-transparent">
+                <option disabled value="">Select a type</option>
+                <option v-for="field_type in valid_types" :key="field_type" :value="field_type">{{ field_type }}</option>
+              </select>
+              <input v-model="new_field_required" type="checkbox" class="border border-gray-200 rounded-md p-2 focus:outline-none" id="required">
+              <label for="required">Required</label>
+              <button @click.prevent="do_create_field(new_field_name, new_field_type, new_field_required)" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">Create</button>
+              <button @click.prevent="hideCreateFieldForm = !hideCreateFieldForm" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded">Cancel</button>
+            </dd>
+          </div>
+          <!-- Add field button, should show above form -->
+          <!-- When clicked button should set hideCreateFieldForm to false -->
+          <div v-if="hideCreateFieldForm" class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Add Field</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+              <button @click.prevent="hideCreateFieldForm = !hideCreateFieldForm" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded">Add Field</button>
+            </dd>
+          </div>
           <table class="min-w-full">
             <thead>
               <tr>
@@ -218,7 +266,7 @@ const confirm_delete_site = () => {
                   <div class="text-sm text-gray-900">{{ field.type }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <!-- <router-link :to="{ name: 'phonebook', params: { site_id: site.id, phonebook_id: phonebook.id } }" class="text-indigo-600 hover:text-indigo-900">View/Edit</router-link> -->
+                  <button v-if="!field.created_by_system" @click.prevent="do_delete_field(field.id)" class="text-red-600 hover:text-red-900">Delete</button>
                 </td>
               </tr>
             </tbody>

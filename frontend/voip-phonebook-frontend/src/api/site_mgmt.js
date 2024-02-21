@@ -2,6 +2,8 @@ import { api } from './index';
 import { auth } from '../main';
 import { API_URL } from './index';
 
+export const valid_types = ["text", "number", "email", "bool"];
+
 export const get_sites = async () => {
   // Get all sites, requires authentication.
   try {
@@ -82,6 +84,31 @@ export const get_fields = async (site_id) => {
   // Get all fields for a site, requires authentication.
   try {
     const response = await api.get(`${API_URL}/site/${site_id}/field`);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}
+
+export const create_field = async (site_id, name, type, required) => {
+  if (!valid_types.includes(type)) return {error: 'invalid_type'}
+  if (name.length < 1) return {error: 'no_name_provided'}
+
+  try {
+    const response = await api.post(`${API_URL}/site/${site_id}/field`, {
+      name: name,
+      type: type,
+      required: required
+    });
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}
+
+export const delete_field = async (site_id, field_id) => {
+  try {
+    const response = await api.delete(`${API_URL}/site/${site_id}/field/${field_id}`);
     return response.data;
   } catch (error) {
     return error.response.data;

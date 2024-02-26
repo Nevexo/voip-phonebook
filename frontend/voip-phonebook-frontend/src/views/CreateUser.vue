@@ -8,8 +8,8 @@ const router = useRouter();
 
 const error = ref(false);
 
-const createUser = async (display_name, email, password) => {
-  const result = await create_user(display_name, email, password);
+const createUser = async (display_name, email, password, remark = "N/A") => {
+  const result = await create_user(display_name, email, password, remark);
   if (result.error == undefined) {
     router.push({ name: 'user', params: { id: result.id }});
   } else {
@@ -27,7 +27,7 @@ const createUser = async (display_name, email, password) => {
     <div class="border-b border-gray-200 mt-8"></div>
     <!-- Form for display name, email and password -->
     <div class="mt-8">
-      <form @submit.prevent="createUser(display_name, email, password)">
+      <form @submit.prevent="createUser(display_name, email, password, remark)">
         <div class="grid grid-cols-1 gap-6">
           <div>
             <label for="display_name" class="block text-sm font-medium text-gray-700">Display Name</label>
@@ -45,6 +45,12 @@ const createUser = async (display_name, email, password) => {
             <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
             <div class="mt-1">
               <input type="password" name="password" v-model="password" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+          </div>
+          <div>
+            <label for="remark" class="block text-sm font-medium text-gray-700">Remark</label>
+            <div class="mt-1">
+              <input type="text" name="remark" v-model="remark" placeholder="N/A" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
             </div>
           </div>
         </div>

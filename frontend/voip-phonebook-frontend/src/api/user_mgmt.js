@@ -59,14 +59,15 @@ export const delete_user = async (id) => {
   }
 }
 
-export const create_user = async (name, email, password) => {
+export const create_user = async (name, email, password, remark) => {
   // Create a user, requires root.
   if (!auth.user.root_user) return null;
   try {
     const response = await api.post(`${API_URL}/user`, {
       name: name,
       email_address: email,
-      password: password
+      password: password,
+      remark: remark
     });
     return response.data;
   } catch (error) {

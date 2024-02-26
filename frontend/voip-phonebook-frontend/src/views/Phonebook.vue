@@ -73,6 +73,19 @@ onMounted(async () => {
                 <router-link :to="{ name: 'phonebook', params: { site_id: site.id, phonebook_id: phonebook.id } }" class="text-indigo-600 hover:text-indigo-900">Edit</router-link>
               </td>
             </tr>
+            <!-- Seperator before add new field -->
+
+            <tr class="bg-gray-50">
+              <!-- Create new entry, show input box for each field, based on type -->
+              <!-- ["text", "number", "email", "bool"], -->
+              <td v-for="field of fields" class="px-6 py-4 whitespace-nowrap">
+                <input v-if="field.type === 'text' || field.type === 'number' || field.type === 'email'" :required="field.required" :placeholder="field.name" type="text" class="border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm">
+                <input v-else-if="field.type === 'bool'" :required="field.required" type="checkbox" class="border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm">
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <router-link :to="{ name: 'phonebook', params: { site_id: site.id, phonebook_id: phonebook.id } }" class="text-indigo-600 hover:text-indigo-900">Add</router-link>
+              </td>
+            </tr>
           </tbody>
         </table>
         <!-- Card footer -->

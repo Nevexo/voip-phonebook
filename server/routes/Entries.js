@@ -103,7 +103,7 @@ router.post("/", async (req, res) => {
 
   // Check all fields match the required schema of {"field_id": string, "value": string}
   for (const field of req.body.fields) {
-    if (!field.field_id || !field.value) {
+    if (!field.field_id || field.value == undefined) {
       return res.status(400).json({ error: "invalid_field", field: field });
     }
   }

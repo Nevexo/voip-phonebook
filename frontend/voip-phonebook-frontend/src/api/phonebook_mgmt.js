@@ -44,4 +44,16 @@ export const get_entries = async (site_id, phonebook_id) => {
   } catch (error) {
     return error.response.data;
   }
+export const create_entry = async (site_id, phonebook_id, fields) => {
+  // Create a new field in the phonebook, requires authentication.
+  try {
+    const response = await api.post(`${API_URL}/site/${site_id}/phonebook/${phonebook_id}/entry`, {
+      "fields": fields
+    });
+    return response.data;
+  } catch(error) {
+    console.dir(error)
+    return error.response.data;
+  }
+}
 }

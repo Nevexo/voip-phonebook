@@ -44,6 +44,8 @@ export const get_entries = async (site_id, phonebook_id) => {
   } catch (error) {
     return error.response.data;
   }
+}
+
 export const create_entry = async (site_id, phonebook_id, fields) => {
   // Create a new field in the phonebook, requires authentication.
   try {
@@ -56,6 +58,7 @@ export const create_entry = async (site_id, phonebook_id, fields) => {
     return error.response.data;
   }
 }
+
 export const update_entry = async (site_id, phonebook_id, entry_id, fields) => {
   // Update the entry, requires authentication.
   try {
@@ -67,4 +70,25 @@ export const update_entry = async (site_id, phonebook_id, entry_id, fields) => {
     return error.response.data;
   }
 }
+
+export const delete_entry = async (site_id, phonebook_id, entry_id) => {
+  // Delete an entry, requires authentication.
+  try {
+    const response = await api.delete(`${API_URL}/site/${site_id}/phonebook/${phonebook_id}/entry/${entry_id}`);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+}
+
+export const rename_phonebook = async (site_id, phonebook_id, name) => {
+  // Rename a phonebook, requires authentication.
+  try {
+    const response = await api.put(`${API_URL}/site/${site_id}/phonebook/${phonebook_id}`, {
+      "name": name
+    });
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
 }

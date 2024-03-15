@@ -5,6 +5,7 @@ import { PhonebookField } from "../types/PhonebookField";
 
 import { logger } from "../index";
 import { get_site } from "../site/SiteManage";
+import { get_phonebooks_by_site } from "../phonebook/BookManage";
 
 export const get_phonebook_field = async (id) => {
   // Get a specific phonebook field by it's ID
@@ -78,6 +79,15 @@ export const delete_phonebook_field = async (id, force = false) => {
       return { error: "field_created_by_system" };
     }
   }
+
+  // TODO: Refactor this to check if the field is in use, for now, if any phonebooks exist this method will fail.
+  // This requires the frontend to be updated to ensure un-used fields aren't populated in the entry.
+  const phonebooks = await get_phonebooks_by_site(field.site.id);
+  if (phonebooks.length > 0) {
+    logger.warn(`delete_phonebook_field: check phonebooks: field ${id} (${field.name}) is in use by phonebooks!`);
+    return { error: "field_in_use_by_phonebooks" };
+  }
+
 
   logger.info(`delete_phonebook_field: deleted phonebook field ${field.id} (${field.name})`);
 

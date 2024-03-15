@@ -124,15 +124,23 @@ const do_create_field = async (name = "", type = "text", required = false) => {
 }
 
 const do_delete_field = async (field_id) => {
-  const result = await delete_field(site.value.id, field_id);
-  if (result.error != undefined) {
-    error.value.title = "Failed to Delete Field"
-    error.value.error = result.error;
-    window.scrollTo(0, 0);
-    return;
-  }
+  // Show deletion modal
+  confirmModalState.value = true;
+  confirmModalHeading.value = "Delete Field"
+  confirmModalMessage.value = "Are you sure you want to delete this field?"
+  confirmModalConfirmButtonText.value = "Delete"
+  confirmModalConfirmButtonAction.value = async () => {
+    confirmModalState.value = false;
+    const result = await delete_field(site.value.id, field_id);
+    if (result.error != undefined) {
+      error.value.title = "Failed to Delete Field"
+      error.value.error = result.error;
+      window.scrollTo(0, 0);
+      return;
+    }
 
-  fields.value = fields.value.filter(field => field.id != field_id);
+    fields.value = fields.value.filter(field => field.id != field_id);
+  }
 }
 </script>
 

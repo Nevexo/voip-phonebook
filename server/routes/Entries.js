@@ -20,6 +20,10 @@ import {
   get_phonebook,
 } from "../phonebook/BookManage.js";
 
+import {
+  get_phonebook_field,
+} from "../fields/PhonebookFieldManager.js";
+
 export const router = Router({ mergeParams: true });
 
 router.get("/", async (req, res) => {
@@ -106,6 +110,21 @@ router.post("/", async (req, res) => {
     if (!field.field_id || field.value == undefined) {
       return res.status(400).json({ error: "invalid_field", field: field });
     }
+
+    // If the field is required, check it's not empty
+    const phonebook_field = await get_phonebook_field(field.field_id);
+    if (!phonebook_field) {
+      return res.status(400).json({ error: "invalid_field", field: field });
+    }
+
+    if (phonebook_field.required && field.value === "") {
+      return res.status(400).json({ error: "required_field_empty", field: field });
+    }
+
+    // If the value is blank, remove the field from the array
+    if (field.value === "") {
+      req.body.fields = req.body.fields.filter(f => f.field_id !== field.field_id);
+    }
   }
 
   const entry = await create_phonebook_entry(req.params.phonebook_id, req.user.id, req.body.fields);
@@ -144,8 +163,23 @@ router.put("/:entry_id", async (req, res) => {
 
   // Check all fields match the required schema of {"field_id": string, "value": string}
   for (const field of req.body.fields) {
-    if (!field.field_id || !field.value) {
+    if (!field.field_id || field.value == undefined) {
       return res.status(400).json({ error: "invalid_field", field: field });
+    }
+    
+    // If the field is required, check it's not empty
+    const phonebook_field = await get_phonebook_field(field.field_id);
+    if (!phonebook_field) {
+      return res.status(400).json({ error: "invalid_field", field: field });
+    }
+
+    if (phonebook_field.required && field.value === "") {
+      return res.status(400).json({ error: "required_field_empty", field: field });
+    }
+
+    // If the value is blank, remove the field from the array
+    if (field.value === "") {
+      req.body.fields = req.body.fields.filter(f => f.field_id !== field.field_id);
     }
   }
 

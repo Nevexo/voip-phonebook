@@ -16,10 +16,20 @@ import {
   delete_phonebook_entry,
 } from "../phonebook_entries/EntryManager.js";
 
+import {
+  get_phonebook,
+} from "../phonebook/BookManage.js";
+
 export const router = Router({ mergeParams: true });
 
 router.get("/", async (req, res) => {
   // List all phonebook entries for this phonebook.
+  // Get the phonebook
+  const phonebook = await get_phonebook(req.params.phonebook_id);
+  
+  if (!phonebook) {
+    return res.status(404).json({ error: "phonebook_does_not_exist" });
+  }
   const entries = await get_phonebook_entries(req.params.phonebook_id);
 
   if (!entries) {
@@ -46,6 +56,12 @@ router.get("/", async (req, res) => {
 
 router.get("/:entry_id", async (req, res) => {
   // Get a specific phonebook entry
+  const phonebook = await get_phonebook(req.params.phonebook_id);
+
+  if (!phonebook) {
+    return res.status(404).json({ error: "phonebook_does_not_exist" });
+  }
+
   const entry = await get_phonebook_entry(req.params.entry_id);
 
   if (!entry) {
@@ -68,6 +84,12 @@ router.get("/:entry_id", async (req, res) => {
 router.post("/", async (req, res) => {
   // Create a new phonebook entry
   // Fields are expected to be {"field_id": "valid field ID from phonebookfields", "value": "string"}
+
+  const phonebook = await get_phonebook(req.params.phonebook_id);
+
+  if (!phonebook) {
+    return res.status(404).json({ error: "phonebook_does_not_exist" });
+  }
 
   // Check for required body fields
   if (!req.body.fields) {
@@ -103,6 +125,12 @@ router.put("/:entry_id", async (req, res) => {
   // Update a phonebook entry
   // Expects an array of new fields and/or an array of updated fields
   // Fields are expected to be {"field_id": "valid field ID from phonebookfields", "value": "string"}
+
+  const phonebook = await get_phonebook(req.params.phonebook_id);
+
+  if (!phonebook) {
+    return res.status(404).json({ error: "phonebook_does_not_exist" });
+  }
 
   // Check for required body fields
   if (!req.body.fields) {
@@ -151,6 +179,13 @@ router.put("/:entry_id", async (req, res) => {
 
 router.delete("/:entry_id", async (req, res) => {
   // Delete a phonebook entry
+  
+  const phonebook = await get_phonebook(req.params.phonebook_id);
+
+  if (!phonebook) {
+    return res.status(404).json({ error: "phonebook_does_not_exist" });
+  }
+
   const entry = await delete_phonebook_entry(req.params.entry_id);
 
   if (entry.error) {

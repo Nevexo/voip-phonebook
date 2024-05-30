@@ -38,6 +38,11 @@ const doLogout = async () => {
           <i class="fa-solid fa-users"></i>
           <span>Users</span>
         </RouterLink>
+        <!-- Vendor Services link -->
+        <RouterLink v-if="auth.user.root_user" :to="{name: 'vendors'}" class="flex items-center gap-1">
+          <i class="fa-solid fa-link"></i>
+          <span>Vendors</span>
+        </RouterLink>
         <!-- Change password link -->
         <RouterLink :to="{name: 'update-password'}" class="flex items-center gap-1">
           <i class="fa-solid fa-key"></i>

@@ -241,6 +241,9 @@ const main = async () => {
     // Accept the entitlement.
     await callback({accepted: true})
 
+    logger.info(`Entitlement ${operand.entitlement.id} accepted.`)
+    console.dir(operand.entitlement, { depth: null })
+
     // Submit some blank metadata
     await socket.emit("entitlement_update", {
       "update_type": "metadata",

@@ -4,6 +4,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { get_site, remove_authorised_user, add_authorised_user, delete_site, get_phonebooks, get_fields, valid_types, create_field, delete_field } from '@/api/site_mgmt';
 import { get_user, get_users } from '@/api/user_mgmt';
+import { delete_entitlement, get_entitlement_by_site } from '@/api/Vendors';
 import { auth } from '../main';
 
 import ConfirmModal from '@/components/ConfirmModal.vue'
@@ -25,6 +26,7 @@ const confirmModalMessage = ref('')
 const confirmModalConfirmButtonText = ref('')
 const confirmModalConfirmButtonAction = ref(() => {})
 const hideCreateFieldForm = ref(true)
+const entitlements = ref([])
 
 onMounted(async () => {
   const result = await get_site(route.params.id);
@@ -40,6 +42,9 @@ onMounted(async () => {
 
   // Get fields
   fields.value = await get_fields(site.value.id);
+
+  // Get entitlements
+  entitlements.value = await get_entitlement_by_site(site.value.id);
 
   if (auth.user.root_user) {
     // Populate authorised users
@@ -69,6 +74,24 @@ const confirm_remove_authorised = (user_id) => {
     authorised_users.value = authorised_users.value.filter(user => user.id != user_id);
     non_authorised_users.value.push(users.find(user => user.id == user_id));
     confirmModalState.value = false;
+  }
+}
+
+const confirm_delete_entitlement = (entitlement) => {
+  confirmModalState.value = true;
+  confirmModalHeading.value = 'Delete Entitlement';
+  confirmModalMessage.value = `Any ${entitlement.vendor_service.friendly_name} devices on your site will no longer be able to access this phonebook, really delete?`;
+  confirmModalConfirmButtonText.value = 'Delete';
+  confirmModalConfirmButtonAction.value = async () => {
+    const result = await delete_entitlement(site.id, entitlement.id);
+    confirmModalState.value = false;
+    if (result.error != undefined) {
+      error.value.title = "Failed to Delete Entitlement"
+      error.value.error = result.error;
+      return;
+    }
+
+    entitlements.value = entitlements.value.filter(entitlement => entitlement.id != entitlement.id);
   }
 }
 
@@ -226,7 +249,7 @@ const do_delete_field = async (field_id) => {
     <!-- Half-width control cards -->
     <div class="grid grid-cols-1 gap-4 mt-8 sm:grid-cols-2">
       <!-- Site Fields Card -->
-      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="bg-white shadow sm:rounded-lg">
         <div class="px-4 py-5 sm:px-6">
           <h3 class="text-lg font-medium leading-6 text-gray-900">Site Phonebook Fields</h3>
           <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage the Fields within your Phonebooks.</p>
@@ -257,15 +280,15 @@ const do_delete_field = async (field_id) => {
           <table class="min-w-full">
             <thead>
               <tr>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name (ID)</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th v-if="entitlements.length == 0 && phonebooks.length == 0" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="field in fields" :key="field.id">
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ field.name }}
+                  <div class="text-sm text-gray-900">{{ field.name }} ({{ field.id }})
                     <span v-if="field.created_by_system" class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">System</span>
                     <span v-if="field.required" class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">Required</span>
                   </div>
@@ -273,17 +296,23 @@ const do_delete_field = async (field_id) => {
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">{{ field.type }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td v-if="entitlements.length == 0 && phonebooks.length == 0" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button v-if="!field.created_by_system" @click.prevent="do_delete_field(field.id)" class="text-red-600 hover:text-red-900">Delete</button>
                 </td>
               </tr>
             </tbody>
           </table>
+          <!-- Yellow alert span message -->
+          <div v-if="entitlements.length > 0 || phonebooks.length > 0" class="bg-yellow-50 px-4 py-5 sm:px-6">
+            <p class="text-sm text-yellow-700">
+              <strong>Fields cannot be deleted</strong> as they are in use by phonebooks or entitlements. This is a temporary limitation.
+            </p>
+          </div>
         </div>
       </div>
 
       <!-- Site information card -->
-      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="bg-white shadow sm:rounded-lg">
         <div class="px-4 py-5 sm:px-6">
           <h3 class="text-lg font-medium leading-6 text-gray-900">Site Information</h3>
           <p class="mt-1 max-w-2xl text-sm text-gray-500">Details about this site.</p>
@@ -311,7 +340,7 @@ const do_delete_field = async (field_id) => {
       </div>
 
       <!-- Authorised Users Card -->
-      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="bg-white shadow sm:rounded-lg">
         <div class="px-4 py-5 sm:px-6">
           <h3 class="text-lg font-medium leading-6 text-gray-900">Authorised Users</h3>
           <p class="mt-1 max-w-2xl text-sm text-gray-500">Users who are authorised to manage this site.</p>
@@ -376,6 +405,64 @@ const do_delete_field = async (field_id) => {
           </dl>
         </div>
     </div>
+  </div>
+
+  <!-- Full width entitlements card -->
+  <div class="bg-white shadow sm:rounded-lg mt-8">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg font-medium leading-6 text-gray-900">Entitlements</h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">Entitlements for this site.</p>
+      <!-- Create entitlment button, right align -->
+      <div class="flex justify-end mt-4">
+        <router-link :to="{ path: `/site/${site.id}/new-entitlement` }" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">New Entitlement</router-link>
+      </div>
     </div>
+
+    <div class="border-t border-gray-200">
+      <div v-if="entitlements.length == 0" class="bg-amber-50 px-4 py-5 sm:px-6">
+        <p class="text-sm text-amber-700">
+          <strong>No entitlements have been created on this site.</strong> Entitlements allow devices to access phonebooks, you must create one to use this site's phonebooks.
+        </p>
+      </div>
+      <table v-else class="min-w-full">
+        <thead>
+          <tr>
+            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mappings</th>
+            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metadata</th>
+            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr v-for="entitlement in entitlements" :key="entitlement.id">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ entitlement.vendor_service.friendly_name }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">
+                <span v-if="entitlement.entitlement_status == 'available'" class="inline-flex items-center rounded-md bg-green-50 gx-4 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-700/10">E: AVAILABLE</span>
+                <span v-else class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10">E: {{ entitlement.entitlement_status.toUpperCase() }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm text-gray-900">
+                <span v-for="(value, key) in entitlement.field_mapping" :key="key" class="inline-flex items-center rounded-md bg-indigo-50 gx-4 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">{{ fields.find(field => field.id == key).name }}: {{ value }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm text-gray-900">
+                <span v-for="(value, key) in entitlement.metadata" :key="key" class="inline-flex items-center rounded-md bg-indigo-50 gx-4 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">{{ key }}: {{ value }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button @click.prevent="confirm_delete_entitlement(entitlement)" class="flex items-center gap-1 bg-red-50 rounded-md px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   </div>
 </template>

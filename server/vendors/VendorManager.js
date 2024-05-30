@@ -65,6 +65,18 @@ export const update_service = async (name, friendly_name, supported_fields, vers
   return existing_service;
 }
 
+export const update_service_provision_time = async (name) => {
+  // Check a service with this name doesn't already exist.
+  const existing_service = await VendorService.findOne({ name: name });
+  if (!existing_service) return { error: "service_does_not_exist" };
+
+  existing_service.last_provision_time = Date.now();
+
+  await existing_service.save();
+  logger.info(`update_service_provision_time: updated service ${existing_service.id} (${existing_service.name}) provision time`)
+  return existing_service;
+}
+
 export const delete_service = async (id) => {
   // Check a service with this name doesn't already exist.
   const existing_service = await VendorService.findOne({ id: id });

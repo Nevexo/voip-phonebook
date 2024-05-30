@@ -10,6 +10,8 @@ import Sites from '../views/Sites.vue'
 import Phonebook from '../views/Phonebook.vue'
 import CreatePhonebook from '../views/CreatePhonebook.vue'
 import UpdatePassword from '../views/UpdatePassword.vue'
+import Vendors from '../views/Vendors.vue'
+import CreateEntitlement from '@/views/CreateEntitlement.vue'
 import { auth } from '../main'
 
 const is_authenticated_guard = async (to, from) => {
@@ -95,6 +97,19 @@ const router = createRouter({
       params: true,
       component: CreatePhonebook,
       beforeEnter: is_authenticated_guard
+    },
+    {
+      path: '/site/:site_id/new-entitlement',
+      name: 'new-entitlement',
+      params: true,
+      component: CreateEntitlement,
+      beforeEnter: is_authenticated_guard
+    },
+    {
+      path: '/vendors',
+      name: 'vendors',
+      component: Vendors,
+      beforeEnter: [is_authenticated_guard, is_root_guard]
     }
   ]
 })

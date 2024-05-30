@@ -26,7 +26,7 @@
 import { logger, vendor_service_socket } from "../index";
 
 import { get_entitlement_for_vendor, update_entitlement_status, update_entitlement_metadata, get_entitlement_by_access_key } from "./EntitlementManager";
-import { get_service_by_name, create_service, update_service } from "./VendorManager";
+import { get_service_by_name, create_service, update_service, update_service_provision_time } from "./VendorManager";
 
 import { get_phonebooks_by_site, get_phonebook } from "../phonebook/BookManage";
 import { get_phonebook_entries } from "../phonebook_entries/EntryManager";
@@ -171,6 +171,9 @@ const handle_provision_accept = async (socket, data) => {
     logger.warn(`handle_provision_accept: ${socket.id}: vendor service ${service.name} sent provision_accept in state ${service.status}, ignoring.`)
     return;
   }
+
+  // Update latest provision time on the vendor service
+  await update_service_provision_time(service.name);
 
   logger.info(`handle_provision_accept: ${socket.id}: vendor service ${service.name} has accepted entitlements, transitioning to available.`)
   await update_service_status(socket, "available");

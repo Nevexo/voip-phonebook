@@ -157,7 +157,7 @@ const new_entry = async () => {
     <div class="border-b border-gray-200 mt-8"></div>
 
     <!-- Full width card with entries table -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg mt-8">
+    <div class="bg-white shadow sm:rounded-lg mt-8">
       <div class="px-4 py-5 sm:px-6">
         <h3 class="text-lg font-medium leading-6 text-gray-900">Entries</h3>
         <p class="mt-1 max-w-2xl text-sm text-gray-500">Entries in this Phonebook.</p>
@@ -229,7 +229,7 @@ const new_entry = async () => {
       </div>
     </div>
     <!-- Full-width card for phonebook management -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg mt-8">
+    <div class="bg-white shadow sm:rounded-lg mt-8">
       <div class="px-4 py-5 sm:px-6">
         <h3 class="text-lg font-medium leading-6 text-gray-900">Phonebook Settings</h3>
         <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage this phonebook.</p>

@@ -54,23 +54,31 @@ export const create_entitlement = async (site_id, vendor_service_id, configurati
   if (existing_entitlement) return { error: "entitlement_already_exists" };
 
   // Field mapping is expected to be:
-  // { "site_field": "vendor_field" }
+  // { "vendor_field": "site_field" }
+  // i.e., "phone_number": "vendor_abc123"
 
   // Ensure field mapping is correct
   // Check all site requested fields are present in the field_mapping
   for (const field of site_fields) {
     if (!field.required) continue;
-    if (!field_mapping[field.id]) return { error: "required_field_missing", message: `Field ${field.name} is required for this site.` };
+    // Check if any of the values of field_mapping contain this ID in the value.
+    if (!Object.values(field_mapping).includes(field.id)) return { error: "missing_field_mapping", message: `Field ${field.id} is required for this site.` };
+  }
+
+  // Check all vendor required fields are present in the field_mapping
+  for (const field of vendor_service.supported_fields) {
+    if (!field.required) continue;
+    if (!Object.keys(field_mapping).includes(field.name)) return { error: "missing_field_mapping", message: `Field ${field.name} is required for this vendor service.` };
   }
 
   // Check all specified mappings are valid against this site
   for (const field in field_mapping) {
-    if (!site_fields.some(f => f.id === field)) return { error: "invalid_field_mapping", message: `Field ${field} is not valid for this site.` };
+    if (!site_fields.some(f => f.id === field_mapping[field])) return { error: "invalid_field_mapping", message: `Field ${field_mapping[field]} is not valid for this site.` };
   }
 
   // Check all specified mappings are valid against this vendor service.
   for (const field in field_mapping) {
-    if (!vendor_service.supported_fields.some(f => f.name === field_mapping[field])) return { error: "invalid_field_mapping", message: `Field ${field_mapping[field]} is not valid for this vendor service.` };
+    if (!vendor_service.supported_fields.some(f => f.name === field)) return { error: "invalid_field_mapping", message: `Field ${field} is not valid for this vendor service.` };
   }
 
   // Generate access key

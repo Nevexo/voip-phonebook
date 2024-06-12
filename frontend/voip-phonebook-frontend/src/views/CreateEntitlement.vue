@@ -66,14 +66,10 @@ const do_entitlement_create = async () => {
   }
 
   let mappings = {};
-  // Invert the mappings to be site_field -> vendor_field
-  for (const [vendor_field, site_field] of Object.entries(field_mapping.value)) {
-    if (site_field != "") {
-      mappings[site_field] = vendor_field;
-    }
+  // Map fields from the vendor service to the site fields
+  for (const field of vendor_services.value.find(service => service.id == vendor_service.value).supported_fields) {
+    mappings[field.name] = field_mapping.value[field.name];
   }
-
-  console.dir(mappings)
 
   const result = await create_entitlement(route.params.site_id, vendor_service.value, mappings);
   if (result.error != undefined) {

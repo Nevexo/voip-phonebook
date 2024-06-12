@@ -447,7 +447,7 @@ const do_delete_field = async (field_id) => {
             </td>
             <td class="px-6 py-4">
               <div class="text-sm text-gray-900">
-                <span v-for="(value, key) in entitlement.field_mapping" :key="key" class="inline-flex items-center rounded-md bg-indigo-50 gx-4 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">{{ fields.find(field => field.id == key).name }}: {{ value }}</span>
+                <span v-for="(value, key) in entitlement.field_mapping" :key="key" class="inline-flex items-center rounded-md bg-indigo-50 gx-4 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">{{ key }} : {{ fields.find(f => f.id == value).name }}</span>
               </div>
             </td>
             <td class="px-6 py-4">

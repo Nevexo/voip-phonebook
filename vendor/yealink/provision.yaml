@@ -1,0 +1,25 @@
+# voip-phonebook / Vendors / Yealink
+# Yealink Phonebook Provisioning File
+
+service:
+  external_url: "http://localhost:3000"
+
+fields:
+  # Define the fields which will be available on this vendor service.
+  # Not that this is only sent once during the initial setup and must not be changed again, without first deleting
+  # the vendor from the API.
+  - name: name
+    remark: First and last name of this contact.
+    required: true
+  
+  - name: mobile_number
+    remark: Mobile number for this contact.
+    required: false
+  
+  - name: home_number
+    remark: Home phone number for this contact.
+    required: false
+
+  - name: work_number
+    remark: Work phone number for this contact.
+    required: false

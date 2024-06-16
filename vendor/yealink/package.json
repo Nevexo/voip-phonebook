@@ -1,0 +1,19 @@
+{
+  "name": "yealink-vendor-service",
+  "module": "index.js",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io-client": "^4.7.5",
+    "winston": "^3.13.0",
+    "xml": "^1.0.1",
+    "yaml": "^2.4.5"
+  }
+}

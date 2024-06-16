@@ -100,6 +100,8 @@ express_app.get("/entitlement/:entitlement_id/book/:phonebook_id/json", async (r
     let entry = response.entries[i];
     let contact = {};
 
+    contact['entitlement'] = entitlement
+
     contact['entry_created_by'] = entry.created_by.name
     contact['fields'] = [];
 
@@ -144,7 +146,7 @@ express_app.get("/entitlement/:entitlement_id/book/:phonebook_id/csv", async (re
     res.send(500).json({ error: "failed_to_get_phonebook", message: err });
   })
 
-  if (!response) {
+  if (!response.entities) {
     return res.status(500).json({ error: "failed_to_get_phonebook" });
   }
 
@@ -216,6 +218,7 @@ const main = async () => {
           "metadata": entitlements[i].metadata
         }
       })
+      console.dir(entitlements[i], { depth: null })
     }
 
     logger.info(`Provisioned with ${entitlements.length} entitlements, sending acceptance.`);

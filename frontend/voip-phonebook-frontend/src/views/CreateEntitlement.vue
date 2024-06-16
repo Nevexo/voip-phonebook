@@ -68,6 +68,10 @@ const do_entitlement_create = async () => {
   let mappings = {};
   // Map fields from the vendor service to the site fields
   for (const field of vendor_services.value.find(service => service.id == vendor_service.value).supported_fields) {
+    // Do not register unmapped fields with the API.
+    if (field_mapping.value[field.name] == "") {
+      continue;
+    }
     mappings[field.name] = field_mapping.value[field.name];
   }
 

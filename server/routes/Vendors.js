@@ -56,5 +56,5 @@ router.delete("/:id", get_and_validate_session, is_root, async (req, res) => {
     return res.status(404).json({ error: service.error });
   }
 
-  return res.statusCode(200).json({"success": true});
+  return res.status(200).json({"success": true});
 })

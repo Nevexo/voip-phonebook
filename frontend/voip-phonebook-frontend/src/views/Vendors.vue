@@ -45,7 +45,7 @@ onMounted(async () => {
 
     <!-- Cards for services -->
     <div class="grid grid-cols-1 mt-8">
-      <div v-for="service in vendor_services" :key="service.id" class="bg-white rounded-lg shadow-md p-4 g-4">
+      <div v-for="service in vendor_services" :key="service.id" class="bg-white rounded-lg shadow-md p-4 g-4 my-3">
         <h2 class="text-xl font-bold">{{ service.friendly_name }}</h2>
         <p class="text-gray-500">{{ service.name }} ({{ service.id }})</p>
         <!-- <span v-if="status != "" class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20"><i class="fa-solid fa-triangle-exclamation"></i> No Authorised Users</span> -->

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<YealinkIPPhoneBook>
+  <Title>Yealink</Title>
+  <Menu Name="Contacts">
+    <Unit Name="Test" Phone1="123123" Phone2="123123" Phone3="123123" default_photo="Resource:"/>
+  </Menu>
+</YealinkIPPhoneBook>

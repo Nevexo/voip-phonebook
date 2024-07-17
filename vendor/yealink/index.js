@@ -14,9 +14,9 @@ let socket;
 
 // Initial service manifest, will be updated with supported_fields once the yaml file is loaded.
 export let service_manifest = {
-  name: "yealink-xml",
+  name: "yealink-adv-xml",
   friendly_name: "Yealink Advanced XML Vendor Service",
-  version: "1.0.0",
+  version: "1.0.1",
   supported_fields: []
 }
 

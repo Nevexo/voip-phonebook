@@ -12,14 +12,14 @@ fields:
     remark: First and last name of this contact.
     required: true
   
-  - name: mobile_number
+  - name: mobile
     remark: Mobile number for this contact.
     required: false
   
-  - name: home_number
+  - name: home
     remark: Home phone number for this contact.
     required: false
 
-  - name: work_number
-    remark: Work phone number for this contact.
+  - name: work
+    friendly: Work
     required: false

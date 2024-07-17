@@ -49,8 +49,6 @@ export const generate_phonebook = (field_mappings, entries) => {
         { "_attr": { "label": internal_name } },
         field.value
       ]});
-
-
     }
 
     pb.YealinkIPPhoneDirectory.push({ DirectoryEntry: phonebook_entry });

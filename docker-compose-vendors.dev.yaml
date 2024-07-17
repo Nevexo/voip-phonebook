@@ -1,7 +1,3 @@
-networks:
-  vendor_services:
-    driver: bridge
-
 services:
   staging_fake_vendor:
     build: ./vendor/fake_vendor
@@ -15,7 +11,7 @@ services:
       - "LOG_LEVEL=debug"
       - "SOCKET_API_KEY=qaTzaT5UkfoeXbOjZD+osPdPWhIOj7NKth5bMGD5VaY="
 
-  yealink-xml:
+  yealink-adv-xml:
     build: ./vendor/yealink
     depends_on:
       - phonebook
@@ -24,5 +20,17 @@ services:
     environment:
       - "LISTEN_PORT=3005"
       - "SOCKET_URL=ws://phonebook:3000"
-      - "LOG_LEVEL=debug"
+      - "LOG_LEVEL=info"
+      - "SOCKET_API_KEY=qaTzaT5UkfoeXbOjZD+osPdPWhIOj7NKth5bMGD5VaY="
+
+  yealink-basic-xml:
+    build: ./vendor/yealink-xml-basic
+    depends_on:
+      - phonebook
+    networks:
+      - vendor_services
+    environment:
+      - "LISTEN_PORT=3006"
+      - "SOCKET_URL=ws://phonebook:3000"
+      - "LOG_LEVEL=info"
       - "SOCKET_API_KEY=qaTzaT5UkfoeXbOjZD+osPdPWhIOj7NKth5bMGD5VaY="

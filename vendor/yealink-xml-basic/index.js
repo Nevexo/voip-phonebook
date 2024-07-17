@@ -13,7 +13,7 @@ import { generate_phonebook } from './dao/YealinkBasicXML';
 export let service_manifest = {
   name: "yealink-xml-basic",
   friendly_name: "Yealink Basic XML Vendor Service (DECT + Desk)",
-  version: "1.0.0",
+  version: "1.1.0",
   supported_fields: [
     {
       "name": "name",
@@ -34,6 +34,11 @@ export let service_manifest = {
       "name": "other",
       "required": false,
       "remark": "Contact's other number, typically used for landline number.",
+    },
+    {
+      "name": "group_field",
+      "required": false,
+      "remark": "Group field, use this to split the contacts book into multiple menus, must match exactly between grouped items."
     }
   ]
 }

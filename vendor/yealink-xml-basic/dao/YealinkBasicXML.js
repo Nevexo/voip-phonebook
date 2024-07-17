@@ -5,15 +5,12 @@
 import { logger } from "../index.js"
 import xml from "xml"
 
-export const generate_phonebook = (field_mappings, entries) => {
-  let pb = {
-    "YealinkIPPhoneBook": [
-      {
-        "Title": "Triarom Contacts",
-      },
-      {
-        "Menu": [{"_attr": {"Name": "Triarom Contacts"}}]
-      }
+const generate_phonebook_menu = (entries, field_mappings, group_name) => {
+  // Create the menu structure.
+  // There may be multiple menus, so they're added with group_name.
+  let menu = {
+    "Menu": [
+      {"_attr": {"Name": group_name || "Triarom Contacts"}},
     ]
   };
 
@@ -35,7 +32,7 @@ export const generate_phonebook = (field_mappings, entries) => {
     const other = entry.fields.find(f => f.field.id === field_mappings.other) || undefined;
 
     // Create the contact object
-    pb['YealinkIPPhoneBook'][1]['Menu'].push({
+    menu['Menu'].push({
       "Unit": {
         "_attr": {
           "Name": name ? name.value : "UNKNOWN",
@@ -46,6 +43,43 @@ export const generate_phonebook = (field_mappings, entries) => {
       }
     })
   }
+
+  return menu;
+}
+
+export const generate_phonebook = (field_mappings, entries) => {
+  let menus = [];
+  
+  if (!field_mappings.group_field) {
+    menus.push(generate_phonebook_menu(entries, field_mappings));
+
+  } else {
+    // Group the contacts by the group field
+    // This should use the value of the group field within each entry, grouping them into arrays.
+    let grouped = entries.reduce((acc, entry) => {
+      const group = entry.fields.find(f => f.field.id === field_mappings.group_field).value;
+      if (!acc[group]) {
+        acc[group] = [];
+      }
+      acc[group].push(entry);
+      return acc;
+    }
+    , {});
+
+    for (const [group, entries] of Object.entries(grouped)) {
+      menus.push(generate_phonebook_menu(entries, field_mappings, group));
+    }
+  }
+
+
+  let pb = {
+    "YealinkIPPhoneBook": [
+      {
+        "Title": "Triarom Contacts",
+      },
+      ...menus
+    ]
+  };
 
   return xml(pb, { declaration: true });
 }

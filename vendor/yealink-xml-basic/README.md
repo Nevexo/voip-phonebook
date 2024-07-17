@@ -19,3 +19,10 @@ while keeping the basic Yealink format on the DECT phones.
 
 Maybe one day, Yealink will sort this out.
 
+## Grouping
+
+As the basic XML file is split into menus, this module allows grouping by setting the `group_field` to one of the
+site fields. When the phonebook is generated, the items will be split by this field.
+
+This is useful, for example, to filter by company. You could have a number of extensions within a business, and set
+the grouping field to the same on all of them, then they'll appear in a single menu.

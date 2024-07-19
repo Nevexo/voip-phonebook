@@ -49,7 +49,7 @@ const confirmRootPromotion = (state, user_id) => {
     // Demoting from root
     confirmModalHeading.value = 'Demote this User'
     confirmModalMessage.value = 'Are you sure you wish to remove root access from this user?'
-    confirmModalConfirmButtonText.value = 'Promote'
+    confirmModalConfirmButtonText.value = 'Demote'
     confirmModalConfirmButtonAction.value = async () => { 
       confirmModalState.value = false
       await update_root_status(user_id, false)

@@ -8,15 +8,14 @@ import { useRouter } from 'vue-router';
 const show_form = ref(true);
 const error = ref(null);
 
-const update_password = async (password, password_confirmation) => {
+const update_password = async (old_password, password, password_confirmation) => {
   error.value = null;
-
   if (password !== password_confirmation) {
     error.value = "Passwords do not match";
     return;
   }
 
-  const result = await change_password(auth.user.id, password_confirmation);
+  const result = await change_password(auth.user.id, password_confirmation, old_password);
   if (result.error != undefined) {
     error.value = "Failed to update password: " + result.error;
     return;
@@ -53,7 +52,13 @@ const update_password = async (password, password_confirmation) => {
           </div>
         </div>
 
-        <form v-if="show_form" @submit.prevent="update_password(password, password_confirmation)">
+        <form v-if="show_form" @submit.prevent="update_password(current_password, password, password_confirmation)">
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="current_password">
+              Current Password
+            </label>
+            <input v-model="current_password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="current_password" type="password">
+          </div>
           <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
               New Password

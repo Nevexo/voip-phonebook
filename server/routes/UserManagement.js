@@ -12,7 +12,8 @@ import {
   change_user_name, 
   change_user_remark,
   change_user_root_status,
-  get_all_users
+  get_all_users,
+  verify_user_password
 } from "../auth/Users.js";
 import { Site } from "../types/Site.js";
 import { get_user_authorised_sites, remove_user_from_site } from "../site/SiteManage.js";
@@ -121,12 +122,29 @@ router.patch("/:id/password", get_and_validate_session, async (req, res) => {
 
   // Change a user's password
   if (!req.body.password) {
+    logger.warn(`user_management: change_user_password: user ${req.params.id} did not provide new password`)
     return res.status(400).json({ error: "missing_password" })
   }
 
   // Require password to have a minimum length of 8 characters.
   if (req.body.password.length < 8) {
+    logger.warn(`user_management: change_user_password: user ${req.params.id} did not meet password complexity policy`)
     return res.status(400).json({ error: "password_complexity_policy_not_met" })
+  }
+
+  // If the user is changing their own password, require the old password, and validate it.
+  if (req.user.id == req.params.id) {
+    if (!req.body.old_password) {
+      logger.warn(`user_management: change_user_password: user ${req.params.id} did not provide old password`)
+      return res.status(400).json({ error: "missing_old_password" })
+    }
+
+    // Validate old password
+    const user = await get_user(req.params.id)
+    if (!await verify_user_password(user.id, req.body.old_password)) {
+      logger.warn(`user_management: change_user_password: user ${req.params.id} provided incorrect old password`)
+      return res.status(401).json({ error: "incorrect_old_password" })
+    }
   }
 
   // Change the user's password.

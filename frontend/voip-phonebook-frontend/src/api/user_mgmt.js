@@ -75,11 +75,12 @@ export const create_user = async (name, email, password, remark) => {
   }
 }
 
-export const change_password = async (id, password) => {
+export const change_password = async (id, password, old_password) => {
   // Change a user's password
   try {
     const response = await api.patch(`${API_URL}/user/${id}/password`, {
-      password: password
+      password: password,
+      old_password: old_password
     });
     return response.data;
   } catch (error) {

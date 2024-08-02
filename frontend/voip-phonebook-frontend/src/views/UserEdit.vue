@@ -94,7 +94,7 @@ const doPasswordChange = async (password, password_confirm) => {
     return;
   }
 
-  const result = await change_password(user.value.id, password);
+  const result = await change_password(user.value.id, password); // Call password change without existing password.
   if (result.error) {
     error.value.title = "Failed to Change Password";
     error.value.error = result.error;
